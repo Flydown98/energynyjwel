@@ -68,20 +68,137 @@
           <div class="ending-star big-star"></div>
           <div class="ending-sparkles"></div>
         </div>
-        <div class="ending-card">
+        <div class="ending-card ending-card-wide">
           <p class="eyebrow">5 / 5 STARS FOUND</p>
           <h2 id="endingTitle">불을 끄면,<br><span>별이 켜집니다.</span></h2>
           <p>작은 실천이 모이면 밤하늘이 조금 더 선명해집니다.</p>
-          <div class="pledge-box">
-            <span>오늘의 에너지 약속</span>
-            <strong>사용하지 않는 조명과 전자기기는 OFF</strong>
-            <strong>여름철 실내 적정온도는 26℃</strong>
+
+          <div class="ending-layout">
+            <div class="ending-left">
+              <div class="pledge-box">
+                <span>오늘의 에너지 약속</span>
+                <strong>사용하지 않는 조명과 전자기기는 OFF</strong>
+                <strong>여름철 실내 적정온도는 26℃</strong>
+              </div>
+
+              <div class="share-preview" aria-label="클리어 기념 이미지 미리보기">
+                <div class="share-preview-stars" aria-hidden="true">✦　★　✦</div>
+                <small>ENERGY SAVING CHALLENGE</small>
+                <strong>5 / 5 STARS FOUND</strong>
+                <b>불을 끄고<br>별을 켜다.</b>
+                <span>남양주시장애인복지관</span>
+                <em id="previewCode">STAR-------</em>
+              </div>
+              <p class="share-note">공유 이미지는 1080×1350px로 자동 생성되며 개인정보는 이미지에 포함되지 않습니다.</p>
+            </div>
+
+            <div class="ending-right">
+              <div class="event-box">
+                <p class="step-kicker">EVENT ENTRY</p>
+                <h3>클리어 기록을 남겨주세요.</h3>
+                <p class="event-copy">이름과 전화번호만 등록하면 참여코드가 발급됩니다. 운영자는 별도의 관리자 페이지에서 참여코드와 등록 정보를 확인할 수 있습니다.</p>
+
+                <form id="entryForm" class="entry-form" novalidate>
+                  <fieldset class="participant-type">
+                    <legend>참여자 구분</legend>
+                    <label><input type="radio" name="participantType" value="adult" checked /> 만 14세 이상</label>
+                    <label><input type="radio" name="participantType" value="guardian" /> 만 14세 미만 참여자의 법정대리인</label>
+                  </fieldset>
+
+                  <label class="field-label" for="participantName"><span id="nameLabelText">이름</span>
+                    <input id="participantName" name="name" type="text" maxlength="30" autocomplete="name" placeholder="이름을 입력해주세요" required />
+                  </label>
+                  <label class="field-label" for="participantPhone"><span id="phoneLabelText">전화번호</span>
+                    <input id="participantPhone" name="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="010-1234-5678" required />
+                  </label>
+
+                  <label class="consent-row">
+                    <input id="privacyConsent" type="checkbox" required />
+                    <span><button id="privacyOpenBtn" class="privacy-link" type="button">개인정보 수집·이용 동의</button> <b>(필수)</b></span>
+                  </label>
+                  <p id="guardianNote" class="guardian-note">만 14세 미만 참여자는 아동의 개인정보 대신 법정대리인의 이름과 전화번호를 입력해주세요.</p>
+                  <input id="websiteField" name="website" type="text" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+                  <div id="registrationStatus" class="registration-status" aria-live="polite">
+                    <span>참여코드</span>
+                    <strong id="participationCode">STAR-------</strong>
+                    <small id="registrationStatusText">아직 기록이 등록되지 않았습니다.</small>
+                  </div>
+
+                  <div class="event-actions">
+                    <button id="registerBtn" class="action-btn record-btn" type="submit">
+                      <span class="action-number">01</span>
+                      <span><b>나의 에너지 기록 등록하기</b><small>추첨 참여 정보 저장</small></span>
+                    </button>
+                    <button id="instagramBtn" class="action-btn instagram-btn" type="button">
+                      <span class="action-number">02</span>
+                      <span><b>인스타그램에 공유하기</b><small>클리어 이미지 + 게시글 문구</small></span>
+                    </button>
+                  </div>
+                </form>
+
+                <div class="event-rules">
+                  <strong>추첨 확인 안내</strong>
+                  <p>공개 게시물에서 참여코드와 캠페인 해시태그를 확인한 뒤, 관리자 페이지에서 해당 참여코드를 검색해 추첨 정보를 관리합니다. 비공개 계정이나 삭제된 게시물은 확인이 어려울 수 있습니다.</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <button id="replayBtn" class="primary-btn" type="button">다시 플레이 <span>↻</span></button>
-          <button id="endingStagesBtn" class="text-btn light" type="button">스테이지 선택으로</button>
+
+          <div class="ending-sub-actions">
+            <button id="replayBtn" class="text-btn light" type="button">처음부터 다시 플레이</button>
+            <button id="endingStagesBtn" class="text-btn light" type="button">스테이지 선택으로</button>
+          </div>
         </div>
       </section>
     </main>
+
+    <dialog id="privacyDialog" class="modal-dialog" aria-labelledby="privacyTitle">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">PRIVACY</p>
+          <h2 id="privacyTitle">개인정보 수집·이용 안내</h2>
+        </div>
+        <button id="privacyCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <p>남양주시장애인복지관은 「불을 끄고 별을 켜다」 캠페인 참여 및 경품 추첨을 위해 아래와 같이 개인정보를 수집·이용합니다.</p>
+        <div class="privacy-table" role="table" aria-label="개인정보 수집 이용 내용">
+          <div role="row"><strong role="rowheader">수집·이용 목적</strong><span role="cell">캠페인 참여 확인, 인스타그램 공유 이벤트 응모 확인, 당첨자 연락 및 경품 안내</span></div>
+          <div role="row"><strong role="rowheader">수집 항목</strong><span role="cell">이름, 휴대전화번호</span></div>
+          <div role="row"><strong role="rowheader">보유·이용 기간</strong><span role="cell">경품 지급 및 이의처리 완료 후 지체 없이 파기(최대 30일)</span></div>
+          <div role="row"><strong role="rowheader">동의 거부 권리</strong><span role="cell">개인정보 수집·이용 동의를 거부할 수 있습니다. 다만 동의하지 않는 경우 경품 추첨 참여가 제한됩니다.</span></div>
+        </div>
+        <p class="privacy-extra">경품 배송에 주소가 필요한 경우, 당첨자에게 별도로 안내하고 별도 동의 후 필요한 최소 정보만 추가 수집하는 방식으로 운영하는 것을 권장합니다.</p>
+        <p class="privacy-extra"><b>만 14세 미만:</b> 본 페이지에서는 아동의 이름·전화번호를 수집하지 않고, 법정대리인이 법정대리인 본인의 이름·전화번호를 입력해 참여하도록 구성했습니다.</p>
+        <p class="privacy-extra">개인정보 관련 문의: 남양주시장애인복지관 · 031-592-7150 · nyjwel@nyjwel.or.kr</p>
+        <a class="privacy-policy-link" href="https://nyjwel.or.kr/privacy" target="_blank" rel="noopener noreferrer">복지관 개인정보처리방침 보기 ↗</a>
+      </div>
+      <div class="modal-foot">
+        <button id="privacyAgreeBtn" class="primary-btn compact" type="button">내용을 확인하고 동의</button>
+      </div>
+    </dialog>
+
+    <dialog id="shareDialog" class="modal-dialog share-dialog" aria-labelledby="shareTitle">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">SHARE READY</p>
+          <h2 id="shareTitle">인스타그램 공유 준비 완료</h2>
+        </div>
+        <button id="shareCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <p>기기에서 Instagram을 선택하면 클리어 이미지를 바로 가져갈 수 있습니다. Instagram이 게시글 문구를 자동으로 받지 않는 경우를 대비해 문구는 클립보드에도 복사합니다.</p>
+        <textarea id="shareCaption" class="share-caption" readonly aria-label="인스타그램 게시글 문구"></textarea>
+        <div class="share-dialog-actions">
+          <button id="copyCaptionBtn" class="secondary-btn" type="button">게시글 문구 복사</button>
+          <button id="downloadCardBtn" class="secondary-btn" type="button">클리어 이미지 저장</button>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button id="nativeShareBtn" class="primary-btn compact" type="button">공유 메뉴 열기</button>
+      </div>
+    </dialog>
 
     <div id="clearOverlay" class="clear-overlay" aria-hidden="true">
       <div class="clear-star" aria-hidden="true"></div>
@@ -92,6 +209,8 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

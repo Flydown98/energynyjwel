@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#07152d" />
+  <title>캠페인 관리자 · 불을 끄고 별을 켜다</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-brand">
+        <span class="brand-star">✦</span>
+        <div><strong>불을 끄고 별을 켜다</strong><small>CAMPAIGN ADMIN</small></div>
+      </div>
+      <div class="header-actions">
+        <span id="adminIdentity" class="admin-identity"></span>
+        <button id="logoutBtn" class="ghost-btn" type="button" hidden>로그아웃</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="setupPanel" class="center-panel" hidden>
+        <div class="login-card">
+          <p class="eyebrow">SETUP REQUIRED</p>
+          <h1>저장소 연결이 필요합니다.</h1>
+          <p><code>config.js</code>에 Supabase 프로젝트 URL과 Publishable key를 입력해주세요.</p>
+        </div>
+      </section>
+
+      <section id="loginPanel" class="center-panel">
+        <form id="loginForm" class="login-card">
+          <p class="eyebrow">ADMIN ONLY</p>
+          <h1>관리자 로그인</h1>
+          <p>등록자 개인정보는 관리자 계정으로 로그인한 경우에만 조회할 수 있습니다.</p>
+          <label>이메일<input id="adminEmail" type="email" autocomplete="username" required placeholder="admin@example.com" /></label>
+          <label>비밀번호<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="비밀번호" /></label>
+          <button id="loginBtn" class="primary-btn" type="submit">로그인</button>
+          <small id="loginStatus" class="status-text" aria-live="polite"></small>
+        </form>
+      </section>
+
+      <section id="dashboardPanel" class="dashboard" hidden>
+        <div class="dashboard-head">
+          <div>
+            <p class="eyebrow">EVENT ENTRIES</p>
+            <h1>참여자 관리</h1>
+            <p>참여코드로 인스타그램 게시물과 등록자를 대조하고 추첨 상태를 관리할 수 있습니다.</p>
+          </div>
+          <div class="dashboard-buttons">
+            <button id="refreshBtn" class="ghost-btn" type="button">새로고침</button>
+            <button id="exportBtn" class="primary-btn compact" type="button">CSV 내보내기</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <article><span>총 등록</span><strong id="statTotal">0</strong></article>
+          <article><span>인스타 확인</span><strong id="statVerified">0</strong></article>
+          <article><span>당첨</span><strong id="statWinner">0</strong></article>
+          <article><span>오늘 등록</span><strong id="statToday">0</strong></article>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box"><span>검색</span><input id="searchInput" type="search" placeholder="이름 · 전화번호 · 참여코드" /></label>
+          <label><span>인스타</span><select id="instagramFilter"><option value="all">전체</option><option value="unchecked">확인 전</option><option value="verified">확인 완료</option><option value="invalid">확인 불가</option></select></label>
+          <label><span>경품</span><select id="prizeFilter"><option value="all">전체</option><option value="none">미선정</option><option value="winner">당첨</option><option value="contacted">연락 완료</option><option value="sent">지급 완료</option></select></label>
+          <div class="toolbar-meta"><b id="visibleCount">0</b>건 표시</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>등록일</th><th>참여코드</th><th>이름</th><th>전화번호</th><th>구분</th><th>인스타</th><th>경품</th><th>관리 메모</th><th></th></tr></thead>
+            <tbody id="entryRows"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" hidden>조건에 맞는 참여자가 없습니다.</div>
+        </div>
+
+        <div class="privacy-admin-note">
+          <div><strong>개인정보 관리</strong><p>경품 지급 및 이의처리가 끝나면 약속한 보유기간에 맞춰 참여정보를 삭제해주세요.</p></div>
+          <button id="purgeBtn" class="danger-btn" type="button">전체 참여정보 삭제</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

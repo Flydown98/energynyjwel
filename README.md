@@ -1,197 +1,260 @@
-# 불을 끄고 별을 켜다 · 관리자 페이지 포함 최종본
+# 불을 끄고 별을 켜다 · Google Sheets + Apps Script 최종본
 
-남양주시장애인복지관 에너지 절약 캠페인용 5스테이지 웹게임입니다. 기존 Google Sheets / Apps Script 저장방식을 제거하고, **별도 관리자 전용 페이지(`admin.html`)**에서 참여정보를 직접 관리하도록 변경했습니다.
+5개 에너지 절약 미니게임 + 클리어 기록 등록 + Instagram 공유 + 관리자 전용 참여자 관리 페이지를 한 번에 구성한 버전입니다.
 
-## 이번 버전의 구조
+이번 버전은 **Supabase를 전혀 사용하지 않습니다.**
+
+- 게임: GitHub Pages
+- 참여자 이름/전화번호 저장: Google Sheets
+- 저장/관리 서버: Google Apps Script
+- 관리자 페이지: Apps Script 웹 앱의 `?page=admin`
+- GitHub의 `admin.html`: 위 관리자 페이지로 자동 이동
+
+## 파일 구조
 
 ```text
-lights-out-stars-on-admin-final/
-├─ index.html              # 참여자용 게임
-├─ game.js
+lights-out-stars-on-appsscript-final/
+├─ index.html
 ├─ styles.css
-├─ config.js               # 기관명 + Supabase 연결값
-├─ admin.html              # 관리자 전용 페이지
-├─ admin.js
-├─ admin.css
-├─ supabase-setup.sql      # DB / 보안정책 1회 설정
-└─ README.md
+├─ game.js
+├─ config.js              ← Apps Script /exec 주소 입력
+├─ admin.html             ← 관리자 페이지 연결용
+├─ README.md
+└─ apps-script/
+   ├─ Code.gs             ← Apps Script 서버
+   └─ Admin.html          ← 관리자 전용 화면
 ```
 
-## 관리자 페이지에서 가능한 것
+---
 
-- 관리자 이메일/비밀번호 로그인
-- 등록자 전체 조회
-- 이름 / 전화번호 / 참여코드 검색
-- 인스타그램 게시물 `확인 전 / 확인 완료 / 확인 불가` 관리
-- 경품 `미선정 / 당첨 / 연락 완료 / 지급 완료` 관리
-- 참가자별 관리 메모
-- 개별 개인정보 삭제
-- 검색/필터 결과 CSV 다운로드
-- 이벤트 종료 후 전체 개인정보 일괄 삭제
-- 총 등록 / 인스타 확인 / 당첨 / 오늘 등록 통계
+# 1. Google Sheet 만들기
 
-관리자 주소는 GitHub Pages 배포 후 아래와 같습니다.
+1. Google 스프레드시트를 새로 만듭니다.
+2. 파일명 예: `불을 끄고 별을 켜다 참여자 관리`
+3. 스프레드시트에서 **확장 프로그램 → Apps Script**를 누릅니다.
+
+시트 탭은 직접 만들 필요가 없습니다. 최초 설정 시 `참여자` 시트가 자동 생성됩니다.
+
+---
+
+# 2. Apps Script 파일 넣기
+
+Apps Script 편집기에서 기본 `Code.gs` 내용을 전부 지우고 이 폴더의
+
+`apps-script/Code.gs`
+
+내용을 그대로 붙여넣습니다.
+
+그 다음 왼쪽의 `+` → **HTML**을 눌러 파일 이름을 정확히
+
+`Admin`
+
+으로 만든 뒤 `apps-script/Admin.html` 내용을 그대로 붙여넣습니다.
+
+즉 Apps Script 프로젝트에는 아래 두 파일이 있어야 합니다.
 
 ```text
-https://아이디.github.io/저장소명/admin.html
+Code.gs
+Admin.html
 ```
 
-`admin.html` 주소를 숨기는 것만으로 보호하는 구조가 아닙니다. 실제 이름/전화번호 조회 권한은 Supabase 로그인 + RLS 정책으로 제한됩니다.
-
 ---
 
-# 1. 왜 Supabase 설정이 필요한가요?
+# 3. 관리자 비밀번호 지정
 
-GitHub Pages는 정적 웹 호스팅이라 여러 참가자의 이름/전화번호를 한곳에 영구 저장할 데이터베이스가 없습니다. 따라서 **Google Sheet는 전혀 사용하지 않고**, Supabase DB를 저장소로만 사용합니다.
-
-참여자는 게임 화면만 보고, 운영자는 `admin.html`만 사용하면 됩니다. 실제 행사 운영 중 Supabase Dashboard를 계속 열어둘 필요는 없습니다.
-
----
-
-# 2. Supabase 프로젝트 만들기
-
-1. Supabase에서 새 프로젝트를 하나 만듭니다.
-2. 프로젝트가 생성되면 `SQL Editor`를 엽니다.
-3. 이 폴더의 `supabase-setup.sql` 전체 내용을 붙여넣고 실행합니다.
-
-이 SQL은 다음 보안을 같이 설정합니다.
-
-- 일반 참가자: 자기 정보를 **등록(INSERT)만 가능**
-- 일반 참가자: 다른 사람의 이름/전화번호 **조회 불가**
-- 관리자: 별도로 등록된 관리자 계정만 조회/수정/삭제 가능
-- RLS(Row Level Security) 활성화
-
----
-
-# 3. 관리자 계정 1개 만들기
-
-Supabase Dashboard에서:
-
-1. `Authentication → Users`
-2. 관리자용 이메일/비밀번호 계정을 직접 만듭니다.
-3. 다시 `SQL Editor`로 갑니다.
-4. 아래 SQL의 이메일만 실제 관리자 이메일로 바꿔 실행합니다.
-
-```sql
-insert into public.campaign_admins (user_id)
-select id from auth.users where lower(email) = lower('admin@example.com')
-on conflict (user_id) do nothing;
-```
-
-이 단계까지 해야 해당 계정으로 `admin.html`에 로그인할 수 있습니다.
-
-여러 명에게 관리자 권한을 주고 싶으면 사용자 계정을 추가로 만든 뒤 같은 SQL을 이메일만 바꿔 다시 실행하면 됩니다.
-
----
-
-# 4. config.js에 연결값 넣기
-
-Supabase Dashboard의 프로젝트 설정에서 아래 두 값을 확인합니다.
-
-- Project URL
-- Publishable key
-
-`config.js`를 열고 아래 두 줄만 바꿉니다.
+`Code.gs` 상단에 다음 줄이 있습니다.
 
 ```js
-supabaseUrl: 'https://xxxxxxxx.supabase.co',
-supabasePublishableKey: 'sb_publishable_...',
+const SETUP_ADMIN_PASSWORD = 'CHANGE-ME-STRONG-PASSWORD';
 ```
 
-**Secret key / service_role key는 절대로 config.js에 넣지 마세요.**
+원하는 관리자 비밀번호로 바꿉니다.
 
-GitHub Pages처럼 브라우저에서 동작하는 앱에는 Publishable key를 사용하고, 실제 접근 제어는 `supabase-setup.sql`에 포함된 RLS 정책이 담당합니다.
+예:
+
+```js
+const SETUP_ADMIN_PASSWORD = 'Nyjwel-Star-2026!';
+```
+
+실제 운영에서는 예시와 다른 충분히 긴 비밀번호를 사용하세요.
+
+그 다음 Apps Script 상단 함수 선택에서 **setupCampaign**을 선택하고 **실행**합니다.
+
+처음 실행할 때 Google 권한 승인 화면이 뜹니다. 이 과정에서 현재 스프레드시트 ID가 Script Properties에 저장되고, 관리자 비밀번호는 salt가 적용된 SHA-256 해시 형태로 Script Properties에 저장됩니다.
+
+`참여자` 시트도 이때 자동 생성됩니다.
 
 ---
 
-# 5. GitHub Pages에 업로드
+# 4. Apps Script 웹 앱 배포
 
-이 폴더 안의 파일들을 모두 GitHub 저장소 최상단에 업로드합니다.
+Apps Script 우측 상단에서:
 
-GitHub에서:
+1. **배포 → 새 배포**
+2. 유형: **웹 앱**
+3. 실행 사용자: **나**
+4. 액세스 권한: **모든 사용자**
+5. **배포**
+6. 발급된 URL 중 끝이 `/exec`인 주소를 복사
 
-1. `Settings`
-2. `Pages`
-3. `Build and deployment → Deploy from a branch`
-4. Branch: `main`
-5. Folder: `/(root)`
-6. Save
+예:
 
-참여자용:
+```text
+https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec
+```
+
+Apps Script 웹 앱은 참가자의 Google 로그인 여부와 관계없이 기록을 받을 수 있어야 하므로 공개 접근으로 배포하되, **개인정보 조회/수정 기능은 관리자 비밀번호 + 서버 세션 토큰으로 별도 보호**하도록 구성했습니다.
+
+---
+
+# 5. GitHub 게임과 연결
+
+GitHub에 올릴 `config.js`를 엽니다.
+
+```js
+appsScriptUrl: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
+```
+
+이 부분을 방금 복사한 실제 `/exec` 주소로 바꿉니다.
+
+예:
+
+```js
+appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxxxxxxxx/exec',
+```
+
+`index.html`, `styles.css`, `game.js`, `config.js`, `admin.html`을 GitHub 저장소 최상단에 올립니다.
+
+GitHub Pages를 켜면 게임은 보통:
 
 ```text
 https://아이디.github.io/저장소명/
 ```
 
-관리자용:
+관리자는:
 
 ```text
 https://아이디.github.io/저장소명/admin.html
 ```
 
-공개 게임 화면에는 관리자 페이지 링크를 넣지 않았습니다.
+로 접속하면 됩니다.
 
----
-
-# 6. 실제 이벤트 운영 흐름
-
-1. 참여자가 5개 스테이지를 클리어합니다.
-2. 마지막 화면에서 이름/전화번호 + 개인정보 동의를 입력합니다.
-3. `나의 에너지 기록 등록하기`를 누릅니다.
-4. `STAR-XXXXXX` 참여코드가 등록됩니다.
-5. `인스타그램에 공유하기`로 클리어 이미지를 게시합니다.
-6. 운영자가 Instagram에서 캠페인 게시물을 확인합니다.
-7. 게시물 이미지의 참여코드를 `admin.html` 검색창에 입력합니다.
-8. 해당 등록자의 `인스타 확인`을 `확인 완료`로 변경합니다.
-9. 추첨 후 `경품 상태`를 `당첨 → 연락 완료 → 지급 완료` 순서로 관리할 수 있습니다.
-
----
-
-# 7. 개인정보 삭제
-
-관리자 페이지 하단의 `전체 참여정보 삭제` 버튼은 이름과 전화번호를 포함한 이벤트 등록정보를 전부 삭제합니다.
-
-실행 시 `전체삭제`라고 다시 입력해야 실제 삭제됩니다.
-
-게임 화면에 표시한 보유기간(현재 기본 문구: `경품 지급 및 이의처리 완료 후 지체 없이 파기(최대 30일)`)과 실제 삭제시점을 일치시켜 운영해주세요.
-
----
-
-# 8. Instagram 공유 기능
-
-5/5 클리어 후 자동 생성되는 이미지에는 개인정보가 들어가지 않고 다음 정보만 표시됩니다.
-
-- 남양주시장애인복지관
-- 불을 끄고 별을 켜다
-- 5 / 5 STARS FOUND
-- 참여코드 `STAR-XXXXXX`
-
-기본 해시태그:
+`admin.html`은 자동으로 아래 Apps Script 관리자 화면으로 이동합니다.
 
 ```text
-#남양주시장애인복지관 #불을끄고별을켜다 #에너지의날 #에너지절약 #에너지절약캠페인
-```
-
-Instagram 게시 자체는 기기의 공유 메뉴를 통해 사용자가 최종 선택하는 방식입니다.
-
----
-
-# 9. 캠페인명 / 기관명 / 해시태그 변경
-
-`config.js`만 수정하면 됩니다.
-
-```js
-organization: '남양주시장애인복지관',
-campaignName: '불을 끄고 별을 켜다',
-shareHashtags: [ ... ]
+Apps Script /exec?page=admin
 ```
 
 ---
 
-# 10. 테스트 팁
+# 6. 참여자가 등록하면 Google Sheet에 저장되는 항목
 
-- 게임 진행 초기화: 게임 우측 상단 `↻`
-- 새 참가자 테스트: 엔딩 화면의 `처음부터 다시 플레이`
-- 관리자 페이지: `admin.html`
-- 관리자 로그인이 되지만 대시보드가 열리지 않는 경우: `campaign_admins` 등록 SQL을 확인
-- 참여자 등록이 안 되는 경우: `config.js`의 Project URL / Publishable key 확인
+`참여자` 시트에 아래 열이 자동으로 생성됩니다.
+
+- ID
+- 서버등록일시
+- 참여코드
+- 참여자구분
+- 이름
+- 전화번호
+- 개인정보동의
+- 별개수
+- 캠페인
+- 클라이언트일시
+- 인스타확인
+- 경품상태
+- 관리메모
+- 최종수정일시
+
+같은 브라우저에서 같은 참여코드로 정보를 다시 등록하면 새 행을 계속 만들지 않고 해당 참여자의 이름/전화번호를 갱신합니다. 관리자가 체크한 인스타 확인 상태, 경품 상태, 메모는 유지됩니다.
+
+---
+
+# 7. 관리자 페이지 기능
+
+관리자 비밀번호로 로그인한 뒤 다음 기능을 사용할 수 있습니다.
+
+- 전체 참여자 조회
+- 오늘 등록자 수 확인
+- 이름 검색
+- 전화번호 검색
+- `STAR-XXXXXX` 참여코드 검색
+- 인스타그램 `확인 전 / 확인 완료 / 확인 불가`
+- 경품 `미선정 / 당첨 / 연락 완료 / 지급 완료`
+- 관리자 메모
+- 개별 참여자 삭제
+- 조건에 맞는 목록 CSV 다운로드
+- Google Sheet 원본 바로 열기
+- 개인정보 전체 삭제
+
+로그인 토큰은 브라우저의 `sessionStorage`에만 저장되고, Apps Script의 `CacheService`에서 최대 6시간 동안 유효합니다. 관리자 비밀번호 자체는 브라우저에 저장하지 않습니다.
+
+---
+
+# 8. 이벤트 운영 흐름
+
+1. 참가자가 QR로 GitHub 게임에 접속
+2. 5개 스테이지 클리어
+3. 이름 + 전화번호 입력
+4. 개인정보 수집·이용 동의
+5. `나의 에너지 기록 등록하기`
+6. Google Sheet에 참여정보 저장
+7. 참가자에게 `STAR-XXXXXX` 참여코드 표시
+8. `인스타그램에 공유하기`
+9. 1080×1350 클리어 이미지 + 참여코드 생성
+10. 캠페인 해시태그와 게시글 문구 복사
+11. 운영자가 공개 Instagram 게시물을 확인
+12. 관리자 페이지에서 참여코드 검색
+13. 인스타 확인 상태 체크
+14. 추첨 후 경품 상태 관리
+
+---
+
+# 9. 개인정보 파기
+
+현재 게임 동의문은 이름과 휴대전화번호를 캠페인 참여 확인, Instagram 공유 이벤트 확인, 당첨자 연락 및 경품 안내에 사용하는 구조입니다.
+
+화면에 고지한 보유기간과 실제 운영 기간을 반드시 일치시키세요.
+
+이벤트 종료 후 관리자 페이지에서 **전체 참여정보 삭제** 버튼을 누르고 정확히 `전체삭제`를 입력하면 헤더를 제외한 참가자 행이 삭제됩니다.
+
+또는 Apps Script 편집기에서 `purgeCampaignDataFromEditor_()` 함수를 직접 실행할 수도 있습니다.
+
+실물 경품 배송에 주소가 필요한 경우에는 처음부터 주소까지 수집하지 말고, **당첨자에게만 별도 안내·동의 후 필요한 배송정보를 최소한으로 추가 수집**하는 방식이 적절합니다.
+
+---
+
+# 10. Apps Script 코드를 수정했을 때
+
+중요합니다.
+
+Apps Script의 `Code.gs` 또는 `Admin.html`을 수정했다면 기존 배포 URL에 코드가 자동으로 반영되지 않을 수 있으므로:
+
+1. **배포 → 배포 관리**
+2. 기존 웹 앱 배포의 수정 버튼
+3. **새 버전** 선택
+4. 다시 배포
+
+하면 됩니다.
+
+가능하면 기존 배포를 삭제하고 새 URL을 만들기보다 **기존 배포를 새 버전으로 갱신**하면 `config.js` 주소를 다시 바꿀 필요가 없습니다.
+
+---
+
+# 11. 테스트 방법
+
+처음에는 실제 전화번호 대신 테스트용 값으로 1건 등록해보세요.
+
+확인할 것:
+
+1. 5단계 클리어 후 등록 가능
+2. `참여자` 시트에 한 행 생성
+3. `admin.html` 접속 → Apps Script 관리자 화면 이동
+4. 관리자 비밀번호 로그인
+5. 해당 테스트 참여자가 목록에 표시
+6. 인스타 상태 변경 후 Google Sheet 값도 변경
+7. 경품 상태 변경 후 Google Sheet 값도 변경
+8. 관리자 메모 저장 확인
+9. 테스트 행 삭제 확인
+
+실제 행사를 열기 전에 스마트폰 LTE/5G에서도 한 번 등록 테스트하는 것을 권장합니다.

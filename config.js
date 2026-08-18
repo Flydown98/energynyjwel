@@ -1,9 +1,7 @@
-// 불을 끄고 별을 켜다 · 공통 설정
-// 중요: Supabase의 "Publishable key"만 넣으세요.
-// Secret key / service_role key는 절대 이 파일에 넣지 마세요.
+// 불을 끄고 별을 켜다 · GitHub Pages 설정
+// Apps Script를 웹 앱으로 배포한 뒤 발급되는 /exec 주소만 아래에 붙여넣으면 됩니다.
 window.CAMPAIGN_APP_CONFIG = {
-  supabaseUrl: 'https://YOUR_PROJECT.supabase.co',
-  supabasePublishableKey: 'YOUR_PUBLISHABLE_KEY',
+  appsScriptUrl: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
   organization: '남양주시장애인복지관',
   campaignName: '불을 끄고 별을 켜다',
   privacyPolicyUrl: 'https://nyjwel.or.kr/privacy',

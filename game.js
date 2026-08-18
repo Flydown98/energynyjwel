@@ -5,32 +5,14 @@
   const CONFIG = {
     organization: APP.organization || '남양주시장애인복지관',
     campaignName: APP.campaignName || '불을 끄고 별을 켜다',
-    storageKey: 'lightsOutStarsOnProgress-v2',
-    participationKey: 'lightsOutStarsOnParticipation-v2',
-    supabaseUrl: APP.supabaseUrl || '',
-    supabasePublishableKey: APP.supabasePublishableKey || '',
+    storageKey: 'lightsOutStarsOnProgress-v3',
+    participationKey: 'lightsOutStarsOnParticipation-v3',
+    submissionEndpoint: APP.appsScriptUrl || '',
     privacyPolicyUrl: APP.privacyPolicyUrl || 'https://nyjwel.or.kr/privacy',
     shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약', '#에너지절약캠페인'],
     clearDelay: 1100,
     nextDelay: 1350,
   };
-
-  let publicDb = null;
-  function backendConfigured() {
-    return /^https:\/\/.+\.supabase\.co$/.test(CONFIG.supabaseUrl)
-      && CONFIG.supabasePublishableKey
-      && !CONFIG.supabasePublishableKey.includes('YOUR_')
-      && Boolean(window.supabase?.createClient);
-  }
-  function getPublicDb() {
-    if (!backendConfigured()) return null;
-    if (!publicDb) {
-      publicDb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabasePublishableKey, {
-        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-      });
-    }
-    return publicDb;
-  }
 
   const stages = [
     { id: 1, title: 'SWITCH', label: '불을 꺼봐', hint: '벽 어딘가에 아주 평범한 스위치가 있습니다.' },
@@ -552,25 +534,25 @@
       showToast('5개의 별을 모두 찾은 뒤 등록할 수 있습니다.');
       return;
     }
-
-    const db = getPublicDb();
-    if (!db) {
-      showToast('참여자 저장 설정이 아직 완료되지 않았습니다.');
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(CONFIG.submissionEndpoint)) {
+      showToast('참여자 저장 서버 연결이 필요합니다. README의 설정 방법을 확인해주세요.');
       els.registrationStatus.classList.add('needs-setup');
-      els.registrationStatusText.textContent = '관리자 설정 필요 · config.js에 Supabase URL과 Publishable key를 입력해주세요.';
+      els.registrationStatusText.textContent = '관리자 설정 필요 · config.js에 Apps Script 웹 앱 /exec 주소를 입력해주세요.';
       return;
     }
 
-    let code = getParticipationCode();
-    const makePayload = () => ({
-      participation_code: code,
-      participant_type: input.participantType,
+    const code = getParticipationCode();
+    const body = new URLSearchParams({
+      action: 'submit',
+      code,
       name: input.name,
       phone: input.phone,
-      privacy_consent: true,
-      stars: 5,
+      participantType: input.participantType,
+      consent: 'yes',
       campaign: CONFIG.campaignName,
-      client_created_at: new Date().toISOString(),
+      stars: '5',
+      clientTimestamp: new Date().toISOString(),
+      website: '',
     });
 
     els.register.disabled = true;
@@ -579,21 +561,15 @@
     els.register.querySelector('small').textContent = '안전하게 등록 중…';
 
     try {
-      let { error } = await db.from('campaign_entries').insert(makePayload());
-
-      // 극히 드문 참여코드 충돌이면 새 코드를 발급해 한 번 더 저장합니다.
-      if (error && (error.code === '23505' || /duplicate|unique/i.test(error.message || ''))) {
-        const prior = loadParticipation() || {};
-        code = generateParticipationCode();
-        saveParticipation({ ...prior, code, registered: false, updatedAt: new Date().toISOString() });
-        cachedShareBlob = null;
-        cachedShareFile = null;
-        renderRegistrationState();
-        ({ error } = await db.from('campaign_entries').insert(makePayload()));
-      }
-
-      if (error) throw error;
-
+      // GitHub Pages → Apps Script 교차 출처 전송은 응답을 읽지 않는 no-cors 방식으로 처리합니다.
+      // 입력값은 브라우저와 Apps Script 양쪽에서 검증합니다.
+      await fetch(CONFIG.submissionEndpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: body.toString(),
+        cache: 'no-store',
+      });
       setRegisteredLocal(true);
       playSuccess();
       showToast('에너지 기록이 등록되었습니다!');
@@ -601,7 +577,7 @@
       els.participantPhone.value = '';
     } catch (err) {
       console.error(err);
-      showToast('등록하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      showToast('등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');
       els.register.querySelector('small').textContent = oldSmall;
     } finally {
       els.register.disabled = false;

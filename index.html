@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07152d" />
+  <meta name="description" content="불을 끄고 별을 켜다 - 5개의 짧은 에너지 절약 퍼즐 웹게임" />
+  <title>불을 끄고 별을 켜다</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <button id="homeBtn" class="brand" type="button" aria-label="처음 화면으로">
+        <span class="brand-star" aria-hidden="true">✦</span>
+        <span>
+          <strong>불을 끄고 별을 켜다</strong>
+          <small id="orgName">에너지 절약 미니게임</small>
+        </span>
+      </button>
+      <div class="top-actions">
+        <button id="soundBtn" class="icon-btn" type="button" aria-label="소리 켜기/끄기" aria-pressed="true">♪</button>
+        <button id="resetBtn" class="icon-btn" type="button" aria-label="진행상황 초기화">↻</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="introScreen" class="screen intro-screen active" aria-labelledby="introTitle">
+        <div class="intro-stars" aria-hidden="true"></div>
+        <div class="intro-card">
+          <p class="eyebrow">ENERGY DAY · MINI PUZZLE</p>
+          <h1 id="introTitle">불을 끄고<br><span>별을 켜다.</span></h1>
+          <p class="intro-copy">설명은 거의 없습니다.<br>누르고, 끌고, 바꿔보며 다섯 개의 별을 찾아보세요.</p>
+          <button id="startBtn" class="primary-btn" type="button">START <span>→</span></button>
+          <p class="intro-note">마우스 · 터치 모두 지원</p>
+        </div>
+      </section>
+
+      <section id="selectScreen" class="screen select-screen" aria-labelledby="selectTitle">
+        <div class="screen-heading">
+          <p class="eyebrow">FIND FIVE STARS</p>
+          <h2 id="selectTitle">STAGE SELECT</h2>
+          <p><strong id="starCount">0</strong> / 5 STARS</p>
+        </div>
+        <div id="stageGrid" class="stage-grid" aria-label="스테이지 선택"></div>
+        <div class="select-footer">
+          <span>별을 찾을수록 밤하늘이 밝아집니다.</span>
+          <div id="miniConstellation" class="mini-constellation" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen" aria-labelledby="stageLabel">
+        <div class="game-meta">
+          <button id="backBtn" class="text-btn" type="button">← STAGES</button>
+          <div>
+            <p id="stageLabel" class="stage-label">STAGE 01</p>
+            <p id="stageSubtitle" class="stage-subtitle">SWITCH</p>
+          </div>
+          <button id="hintBtn" class="hint-btn" type="button" aria-expanded="false">HINT ?</button>
+        </div>
+
+        <div id="gameFrame" class="game-frame" aria-live="polite"></div>
+        <p id="hintText" class="hint-text" hidden></p>
+      </section>
+
+      <section id="endingScreen" class="screen ending-screen" aria-labelledby="endingTitle">
+        <div class="ending-sky" aria-hidden="true">
+          <div class="ending-star big-star"></div>
+          <div class="ending-sparkles"></div>
+        </div>
+        <div class="ending-card">
+          <p class="eyebrow">5 / 5 STARS FOUND</p>
+          <h2 id="endingTitle">불을 끄면,<br><span>별이 켜집니다.</span></h2>
+          <p>작은 실천이 모이면 밤하늘이 조금 더 선명해집니다.</p>
+          <div class="pledge-box">
+            <span>오늘의 에너지 약속</span>
+            <strong>사용하지 않는 조명과 전자기기는 OFF</strong>
+            <strong>여름철 실내 적정온도는 26℃</strong>
+          </div>
+          <button id="replayBtn" class="primary-btn" type="button">다시 플레이 <span>↻</span></button>
+          <button id="endingStagesBtn" class="text-btn light" type="button">스테이지 선택으로</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="clearOverlay" class="clear-overlay" aria-hidden="true">
+      <div class="clear-star" aria-hidden="true"></div>
+      <p>STAR FOUND</p>
+      <strong id="clearStageText">01 / 05</strong>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

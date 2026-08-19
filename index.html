@@ -30,9 +30,11 @@
         <div class="intro-card">
           <p class="eyebrow">ENERGY DAY · MINI PUZZLE</p>
           <h1 id="introTitle">불을 끄고<br><span>별을 켜다.</span></h1>
-          <p class="intro-copy">설명은 거의 없습니다.<br>누르고, 끌고, 바꿔보며 다섯 개의 별을 찾아보세요.</p>
+          <p class="intro-copy">먼저 자유롭게 만져보며 별을 찾아보세요.<br>막히면 힌트와 도움 기능을 언제든 사용할 수 있습니다.</p>
+          <div class="intro-community" aria-live="polite"><strong id="publicParticipationCount">—</strong><span>명의 에너지 지킴이가 기록을 남겼어요</span></div>
           <button id="startBtn" class="primary-btn" type="button">START <span>→</span></button>
-          <p class="intro-note">마우스 · 터치 모두 지원</p>
+          <button id="introHelpBtn" class="intro-help-btn" type="button">플레이가 어려우신가요? <b>도움 기능 보기</b></button>
+          <p class="intro-note">마우스 · 터치 · 키보드 지원</p>
         </div>
       </section>
 
@@ -56,11 +58,18 @@
             <p id="stageLabel" class="stage-label">STAGE 01</p>
             <p id="stageSubtitle" class="stage-subtitle">SWITCH</p>
           </div>
-          <button id="hintBtn" class="hint-btn" type="button" aria-expanded="false">HINT ?</button>
+          <div class="game-meta-actions">
+            <button id="helpBtn" class="help-btn" type="button" aria-haspopup="dialog">도움</button>
+            <button id="hintBtn" class="hint-btn" type="button" aria-expanded="false">HINT ?</button>
+          </div>
         </div>
 
         <div id="gameFrame" class="game-frame" aria-live="polite"></div>
-        <p id="hintText" class="hint-text" hidden></p>
+        <p id="hintText" class="hint-text" role="status" aria-live="polite" hidden></p>
+        <div id="autoHelpActions" class="auto-help-actions" hidden>
+          <button id="assistControlBtn" class="mini-help-btn" type="button">쉬운 조작 켜기</button>
+          <button id="alternativeBtn" class="mini-help-btn accent" type="button">다른 방식으로 참여</button>
+        </div>
       </section>
 
       <section id="endingScreen" class="screen ending-screen" aria-labelledby="endingTitle">
@@ -79,6 +88,7 @@
                 <span>오늘의 에너지 약속</span>
                 <strong>사용하지 않는 조명과 전자기기는 OFF</strong>
                 <strong>여름철 실내 적정온도는 26℃</strong>
+                <div class="community-impact"><b id="endingParticipationCount">—</b><small>명의 에너지 지킴이가 기록을 남겼습니다</small></div>
               </div>
 
               <div class="share-preview" aria-label="클리어 기념 이미지 미리보기">
@@ -139,7 +149,8 @@
 
                 <div class="event-rules">
                   <strong>추첨 확인 안내</strong>
-                  <p>공개 게시물에서 참여코드와 캠페인 해시태그를 확인한 뒤, 관리자 페이지에서 해당 참여코드를 검색해 추첨 정보를 관리합니다. 비공개 계정이나 삭제된 게시물은 확인이 어려울 수 있습니다.</p>
+                  <p>공개 계정은 참여코드와 캠페인 해시태그로 확인합니다. <b>비공개 계정도 참여 가능</b>하며, 게시 후 참여코드가 보이는 화면을 캡처해 복지관 공식 인스타그램 DM으로 보내주세요.</p>
+                  <button id="privateInstagramBtn" class="inline-info-btn" type="button">비공개 계정 인증 방법 보기</button>
                 </div>
               </div>
             </div>
@@ -152,6 +163,32 @@
         </div>
       </section>
     </main>
+
+    <dialog id="helpDialog" class="modal-dialog help-dialog" aria-labelledby="helpTitle">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">PLAY SUPPORT</p>
+          <h2 id="helpTitle">플레이 도움</h2>
+        </div>
+        <button id="helpCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body help-body">
+        <p>퍼즐 조작이 어렵거나 방법을 찾기 힘들 때 사용할 수 있습니다. 장애 여부와 관계없이 누구나 편하게 이용해주세요.</p>
+        <div class="help-options">
+          <button id="easyControlBtn" class="help-option" type="button" aria-pressed="false"><b>쉬운 조작</b><span>터치 영역을 키우고, 드래그 퍼즐에는 버튼 조작을 추가합니다.</span></button>
+          <button id="showHintNowBtn" class="help-option" type="button"><b>힌트 바로 보기</b><span>현재 스테이지의 구체적인 힌트를 표시합니다.</span></button>
+        </div>
+        <div id="alternativeParticipation" class="alternative-participation">
+          <div class="alternative-head"><b>퍼즐 대신 에너지 절약 실천으로 참여</b><span>조작이 어려운 경우 오늘 실천할 약속을 하나 선택하면 현재 스테이지의 별을 켤 수 있습니다.</span></div>
+          <div class="pledge-choice-grid">
+            <button class="pledge-choice" type="button" data-pledge="사용하지 않는 조명 끄기">💡 <span>사용하지 않는 조명 끄기</span></button>
+            <button class="pledge-choice" type="button" data-pledge="사용하지 않는 플러그와 전자기기 끄기">🔌 <span>사용하지 않는 전자기기 끄기</span></button>
+            <button class="pledge-choice" type="button" data-pledge="여름철 실내 적정온도 26℃ 지키기">26° <span>적정온도 26℃ 지키기</span></button>
+            <button class="pledge-choice" type="button" data-pledge="냉방 중 창문 닫기">🪟 <span>냉방 중 창문 닫기</span></button>
+          </div>
+        </div>
+      </div>
+    </dialog>
 
     <dialog id="privacyDialog" class="modal-dialog" aria-labelledby="privacyTitle">
       <div class="modal-head">
@@ -179,6 +216,28 @@
       </div>
     </dialog>
 
+    <dialog id="privateInstagramDialog" class="modal-dialog" aria-labelledby="privateInstagramTitle">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">PRIVATE ACCOUNT</p>
+          <h2 id="privateInstagramTitle">비공개 계정 인증 방법</h2>
+        </div>
+        <button id="privateInstagramCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="private-steps">
+          <div><b>1</b><span>클리어 이미지를 인스타그램 게시물 또는 스토리에 업로드합니다.</span></div>
+          <div><b>2</b><span><strong id="privateParticipationCode">STAR-------</strong> 참여코드가 보이도록 업로드 화면을 캡처합니다.</span></div>
+          <div><b>3</b><span>캡처 화면을 <strong>남양주시장애인복지관 공식 인스타그램 DM</strong>으로 보내주세요.</span></div>
+        </div>
+        <p class="privacy-extra">공개 계정은 기존처럼 해시태그와 참여코드로 확인하므로 별도 DM이 필요하지 않습니다.</p>
+      </div>
+      <div class="modal-foot private-modal-actions">
+        <button id="copyPrivateCodeBtn" class="secondary-btn" type="button">참여코드 복사</button>
+        <button id="privateInstagramDoneBtn" class="primary-btn compact" type="button">확인</button>
+      </div>
+    </dialog>
+
     <dialog id="shareDialog" class="modal-dialog share-dialog" aria-labelledby="shareTitle">
       <div class="modal-head">
         <div>
@@ -188,7 +247,7 @@
         <button id="shareCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
       </div>
       <div class="modal-body">
-        <p>기기에서 Instagram을 선택하면 클리어 이미지를 바로 가져갈 수 있습니다. Instagram이 게시글 문구를 자동으로 받지 않는 경우를 대비해 문구는 클립보드에도 복사합니다.</p>
+        <p>기기에서 Instagram을 선택하면 클리어 이미지를 바로 가져갈 수 있습니다. Instagram이 게시글 문구를 자동으로 받지 않는 경우를 대비해 문구는 클립보드에도 복사합니다. 비공개 계정은 업로드 후 참여코드가 보이는 화면을 캡처해 복지관 공식 Instagram DM으로 인증할 수 있습니다.</p>
         <textarea id="shareCaption" class="share-caption" readonly aria-label="인스타그램 게시글 문구"></textarea>
         <div class="share-dialog-actions">
           <button id="copyCaptionBtn" class="secondary-btn" type="button">게시글 문구 복사</button>

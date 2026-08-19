@@ -6,7 +6,8 @@
     organization: APP.organization || '남양주시장애인복지관',
     campaignName: APP.campaignName || '불을 끄고 별을 켜다',
     storageKey: 'lightsOutStarsOnProgress-v3',
-    participationKey: 'lightsOutStarsOnParticipation-v3',
+    participationKey: 'lightsOutStarsOnParticipation-v4',
+    assistanceKey: 'lightsOutStarsOnAssistance-v1',
     submissionEndpoint: APP.appsScriptUrl || '',
     privacyPolicyUrl: APP.privacyPolicyUrl || 'https://nyjwel.or.kr/privacy',
     shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약', '#에너지절약캠페인'],
@@ -15,11 +16,11 @@
   };
 
   const stages = [
-    { id: 1, title: 'SWITCH', label: '불을 꺼봐', hint: '벽 어딘가에 아주 평범한 스위치가 있습니다.' },
-    { id: 2, title: '26°', label: '숫자를 맞춰봐', hint: '여름철 실내 적정온도를 떠올려 보세요.' },
-    { id: 3, title: 'STANDBY', label: '작은 불빛들', hint: '퇴근 후에도 빛나는 빨간 점부터 눌러보세요.' },
-    { id: 4, title: 'WINDOW', label: '새는 바람', hint: '에어컨 바람이 밖으로 새고 있습니다. 창문을 끝까지 닫아보세요.' },
-    { id: 5, title: 'LIGHTS OUT', label: '오늘의 마지막 불', hint: '건물에 남아 있는 모든 불빛을 꺼보세요.' },
+    { id: 1, title: 'SWITCH', label: '불을 꺼봐', hint: '벽 어딘가에 아주 평범한 스위치가 있습니다.', directHint: '화면 왼쪽 아래쪽의 벽 스위치를 눌러보세요.' },
+    { id: 2, title: '26°', label: '숫자를 맞춰봐', hint: '여름철 실내 적정온도를 떠올려 보세요.', directHint: '온도를 26℃로 맞춰보세요. +/− 버튼으로도 조작할 수 있습니다.' },
+    { id: 3, title: 'STANDBY', label: '작은 불빛들', hint: '퇴근 후에도 빛나는 빨간 점부터 눌러보세요.', directHint: '대기전력 불빛이 켜진 기기를 하나씩 눌러 모두 꺼보세요.' },
+    { id: 4, title: 'WINDOW', label: '새는 바람', hint: '에어컨 바람이 밖으로 새고 있습니다. 창문을 끝까지 닫아보세요.', directHint: '창문 패널을 오른쪽 끝까지 밀어 닫아보세요. 쉬운 조작을 켜면 버튼으로도 닫을 수 있습니다.' },
+    { id: 5, title: 'LIGHTS OUT', label: '오늘의 마지막 불', hint: '건물에 남아 있는 모든 불빛을 꺼보세요.', directHint: '건물의 밝은 창문을 하나씩 눌러 모두 꺼보세요.' },
   ];
 
   const els = {
@@ -71,6 +72,24 @@
     copyCaption: document.getElementById('copyCaptionBtn'),
     downloadCard: document.getElementById('downloadCardBtn'),
     nativeShare: document.getElementById('nativeShareBtn'),
+    introHelp: document.getElementById('introHelpBtn'),
+    helpBtn: document.getElementById('helpBtn'),
+    helpDialog: document.getElementById('helpDialog'),
+    helpClose: document.getElementById('helpCloseBtn'),
+    easyControl: document.getElementById('easyControlBtn'),
+    showHintNow: document.getElementById('showHintNowBtn'),
+    autoHelpActions: document.getElementById('autoHelpActions'),
+    assistControl: document.getElementById('assistControlBtn'),
+    alternative: document.getElementById('alternativeBtn'),
+    pledgeChoices: [...document.querySelectorAll('.pledge-choice')],
+    publicParticipationCount: document.getElementById('publicParticipationCount'),
+    endingParticipationCount: document.getElementById('endingParticipationCount'),
+    privateInstagram: document.getElementById('privateInstagramBtn'),
+    privateInstagramDialog: document.getElementById('privateInstagramDialog'),
+    privateInstagramClose: document.getElementById('privateInstagramCloseBtn'),
+    privateInstagramDone: document.getElementById('privateInstagramDoneBtn'),
+    privateParticipationCode: document.getElementById('privateParticipationCode'),
+    copyPrivateCode: document.getElementById('copyPrivateCodeBtn'),
   };
 
   let progress = loadProgress();
@@ -82,8 +101,165 @@
   let toastTimer = null;
   let cachedShareBlob = null;
   let cachedShareFile = null;
+  let helpTimers = [];
+  let publicCount = null;
+  let easyControlOn = loadEasyControl();
 
   els.orgName.textContent = `${CONFIG.organization} · 에너지 절약 미니게임`;
+
+  // PC / 모바일 자동 레이아웃 전환
+  // 화면 폭뿐 아니라 터치 포인터와 회전 상태까지 감지해 스마트폰/태블릿에서 레이아웃을 자동 변경합니다.
+  const mobileLayoutQuery = window.matchMedia('(max-width: 760px), (pointer: coarse) and (max-width: 1024px)');
+
+  function syncResponsiveLayout() {
+    const vv = window.visualViewport;
+    const viewportHeight = Math.round(vv?.height || window.innerHeight || document.documentElement.clientHeight);
+    const viewportWidth = Math.round(vv?.width || window.innerWidth || document.documentElement.clientWidth);
+    const isMobileLayout = mobileLayoutQuery.matches;
+    const isLandscape = viewportWidth > viewportHeight;
+
+    document.documentElement.dataset.layout = isMobileLayout ? 'mobile' : 'desktop';
+    document.documentElement.dataset.orientation = isLandscape ? 'landscape' : 'portrait';
+    document.documentElement.style.setProperty('--app-vh', `${viewportHeight}px`);
+    document.documentElement.style.setProperty('--app-vw', `${viewportWidth}px`);
+  }
+
+  syncResponsiveLayout();
+  mobileLayoutQuery.addEventListener?.('change', syncResponsiveLayout);
+  window.addEventListener('resize', syncResponsiveLayout, { passive: true });
+  window.addEventListener('orientationchange', syncResponsiveLayout, { passive: true });
+  window.visualViewport?.addEventListener('resize', syncResponsiveLayout, { passive: true });
+
+
+  function loadEasyControl() {
+    try { return localStorage.getItem(CONFIG.assistanceKey) === 'on'; }
+    catch (_) { return false; }
+  }
+
+  function setEasyControl(enabled, announce = true) {
+    easyControlOn = Boolean(enabled);
+    document.documentElement.dataset.assist = easyControlOn ? 'on' : 'off';
+    try { localStorage.setItem(CONFIG.assistanceKey, easyControlOn ? 'on' : 'off'); } catch (_) {}
+    if (els.easyControl) {
+      els.easyControl.setAttribute('aria-pressed', String(easyControlOn));
+      els.easyControl.classList.toggle('active', easyControlOn);
+      const b = els.easyControl.querySelector('b');
+      if (b) b.textContent = easyControlOn ? '쉬운 조작 사용 중' : '쉬운 조작';
+    }
+    if (els.assistControl) els.assistControl.textContent = easyControlOn ? '쉬운 조작 끄기' : '쉬운 조작 켜기';
+    if (announce) showToast(easyControlOn ? '쉬운 조작을 켰습니다.' : '쉬운 조작을 껐습니다.');
+  }
+
+  function clearHelpTimers() {
+    helpTimers.forEach(clearTimeout);
+    helpTimers = [];
+    els.hintBtn?.classList.remove('attention');
+    if (els.autoHelpActions) els.autoHelpActions.hidden = true;
+  }
+
+  function pulseCurrentTarget() {
+    const selectors = {
+      1: '.wall-switch',
+      2: '.temp-btn',
+      3: '.device-node:not(.off)',
+      4: '.window-panel',
+      5: '.building-window:not(.off)'
+    };
+    const target = els.gameFrame.querySelector(selectors[currentStage] || '');
+    if (!target) return;
+    target.classList.add('guidance-pulse');
+    setTimeout(() => target.classList.remove('guidance-pulse'), 3300);
+  }
+
+  function revealHint(level = 1, announce = false) {
+    if (!currentStage || stageSolved) return;
+    const data = stages[currentStage - 1];
+    els.hintText.textContent = level >= 2 ? data.directHint : data.hint;
+    els.hintText.hidden = false;
+    els.hintBtn.setAttribute('aria-expanded', 'true');
+    els.hintBtn.classList.remove('attention');
+    if (level >= 2) {
+      pulseCurrentTarget();
+      els.autoHelpActions.hidden = false;
+    }
+    if (announce) showToast(level >= 2 ? '조금 더 구체적인 힌트를 표시했습니다.' : '힌트를 표시했습니다.');
+  }
+
+  function scheduleStageHelp() {
+    clearHelpTimers();
+    helpTimers.push(setTimeout(() => {
+      if (stageSolved || !currentStage) return;
+      els.hintBtn.classList.add('attention');
+      showToast('막히면 HINT를 눌러보세요.');
+    }, 12000));
+    helpTimers.push(setTimeout(() => {
+      if (stageSolved || !currentStage) return;
+      revealHint(1);
+    }, 24000));
+    helpTimers.push(setTimeout(() => {
+      if (stageSolved || !currentStage) return;
+      revealHint(2);
+    }, 38000));
+  }
+
+  function openHelpDialog(showAlternative = false) {
+    setEasyControl(easyControlOn, false);
+    const panel = document.getElementById('alternativeParticipation');
+    if (panel) {
+      panel.hidden = !currentStage;
+      panel.classList.toggle('emphasis', Boolean(showAlternative && currentStage));
+    }
+    if (els.showHintNow) els.showHintNow.disabled = !currentStage;
+    els.helpDialog?.showModal();
+  }
+
+  function completeStageByPledge(pledge) {
+    if (!currentStage || stageSolved) return;
+    const stageId = currentStage;
+    try {
+      const history = JSON.parse(localStorage.getItem('lightsOutStarsOnPledges-v1') || '[]');
+      history.push({ stage: stageId, pledge, at: new Date().toISOString() });
+      localStorage.setItem('lightsOutStarsOnPledges-v1', JSON.stringify(history.slice(-20)));
+    } catch (_) {}
+    els.helpDialog?.close();
+    showToast(`“${pledge}” 실천으로 별을 켭니다.`);
+    setTimeout(() => completeStage(stageId), 420);
+  }
+
+  function isValidEndpoint() {
+    return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(CONFIG.submissionEndpoint);
+  }
+
+  function setPublicCount(count) {
+    const n = Number(count);
+    if (!Number.isFinite(n) || n < 0) return;
+    publicCount = Math.floor(n);
+    const text = publicCount.toLocaleString('ko-KR');
+    if (els.publicParticipationCount) els.publicParticipationCount.textContent = text;
+    if (els.endingParticipationCount) els.endingParticipationCount.textContent = text;
+  }
+
+  function loadPublicCount() {
+    if (!isValidEndpoint()) return;
+    const cb = `__energyCount_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    let timer = null;
+    const cleanup = () => {
+      clearTimeout(timer);
+      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+      script.remove();
+    };
+    window[cb] = payload => {
+      if (payload?.ok) setPublicCount(payload.count);
+      cleanup();
+    };
+    const joiner = CONFIG.submissionEndpoint.includes('?') ? '&' : '?';
+    script.src = `${CONFIG.submissionEndpoint}${joiner}action=count&callback=${encodeURIComponent(cb)}&_=${Date.now()}`;
+    script.async = true;
+    script.onerror = cleanup;
+    document.head.appendChild(script);
+    timer = setTimeout(cleanup, 8000);
+  }
 
   function loadProgress() {
     try {
@@ -132,6 +308,7 @@
     cleanupCurrentStage();
     currentStage = null;
     stageSolved = false;
+    clearHelpTimers();
     els.hintText.hidden = true;
     els.hintBtn.setAttribute('aria-expanded', 'false');
     renderStageSelect();
@@ -150,12 +327,18 @@
     els.hintText.hidden = true;
     els.hintBtn.setAttribute('aria-expanded', 'false');
     showScreen(els.game);
-    cleanupCurrentStage = renderStage(id);
+    const stageCleanup = renderStage(id);
+    scheduleStageHelp();
+    cleanupCurrentStage = () => {
+      clearHelpTimers();
+      stageCleanup?.();
+    };
   }
 
   function completeStage(id) {
     if (stageSolved) return;
     stageSolved = true;
+    clearHelpTimers();
     if (!progress.cleared.includes(id)) {
       progress.cleared.push(id);
       progress.cleared.sort((a,b) => a-b);
@@ -224,19 +407,24 @@
           <div class="light-cone"></div><div class="lamp-arm"></div><div class="lamp-head"></div><div class="lamp-base"></div>
         </div>
         <button class="wall-switch" id="wallSwitch" type="button" aria-label="벽 스위치"></button>
+        <button class="stage-assist-action" id="stage1Assist" type="button">💡 전등 끄기</button>
         <span class="scene-caption">01 · AFTER WORK</span>
       </div>`;
     const scene = document.getElementById('roomStage');
     const sw = document.getElementById('wallSwitch');
+    const assist = document.getElementById('stage1Assist');
+    let activated = false;
     const click = () => {
-      if (stageSolved) return;
+      if (stageSolved || activated) return;
+      activated = true;
       playClick();
       scene.classList.add('off');
       sw.setAttribute('aria-label', '불 꺼짐');
       setTimeout(() => completeStage(1), 650);
     };
     sw.addEventListener('click', click, { once: true });
-    return () => sw.removeEventListener('click', click);
+    assist.addEventListener('click', click, { once: true });
+    return () => { sw.removeEventListener('click', click); assist.removeEventListener('click', click); };
   }
 
   function renderStage2() {
@@ -308,10 +496,12 @@
           <div class="standby-center-star star-shape"></div>
           <span class="board-label">STANDBY POWER · 5 DEVICES</span>
         </div>
+        <button class="stage-assist-action" id="stage3Assist" type="button">🔌 대기전력 한 번에 끄기</button>
         <span class="scene-caption" style="color:#46546a">03 · GOOD NIGHT</span>
       </div>`;
     const scene = document.getElementById('standbyStage');
     const buttons = [...scene.querySelectorAll('.device-node')];
+    const assist = document.getElementById('stage3Assist');
     const handlers = [];
     let offCount = 0;
     buttons.forEach(btn => {
@@ -325,7 +515,12 @@
       };
       handlers.push([btn,handler]); btn.addEventListener('click',handler);
     });
-    return () => handlers.forEach(([b,h]) => b.removeEventListener('click',h));
+    const assistHandler = () => {
+      if (stageSolved) return;
+      buttons.forEach((btn, i) => setTimeout(() => btn.click(), i * 110));
+    };
+    assist.addEventListener('click', assistHandler);
+    return () => { handlers.forEach(([b,h]) => b.removeEventListener('click',h)); assist.removeEventListener('click', assistHandler); };
   }
 
   function renderStage4() {
@@ -339,11 +534,13 @@
           <div class="window-panel" id="windowPanel" role="slider" tabindex="0" aria-label="창문 닫기" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
         </div>
         <div class="window-track"></div>
+        <button class="stage-assist-action" id="stage4Assist" type="button">🪟 버튼으로 창문 닫기</button>
         <span class="scene-caption">04 · KEEP IT COOL</span>
       </div>`;
     const scene = document.getElementById('windowStage');
     const win = document.getElementById('bigWindow');
     const panel = document.getElementById('windowPanel');
+    const assist = document.getElementById('stage4Assist');
     let dragging = false;
     let pct = 0;
     let startX = 0;
@@ -367,8 +564,9 @@
       if (e.key === 'ArrowRight') { e.preventDefault(); setPct(pct + 10); tone(240,.04,'sine',.015); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); setPct(pct - 10); tone(220,.04,'sine',.015); }
     };
-    panel.addEventListener('pointerdown',pdown); panel.addEventListener('pointermove',pmove); panel.addEventListener('pointerup',pup); panel.addEventListener('pointercancel',pup); panel.addEventListener('keydown',key);
-    return () => { panel.removeEventListener('pointerdown',pdown); panel.removeEventListener('pointermove',pmove); panel.removeEventListener('pointerup',pup); panel.removeEventListener('pointercancel',pup); panel.removeEventListener('keydown',key); };
+    const assistHandler = () => setPct(100);
+    panel.addEventListener('pointerdown',pdown); panel.addEventListener('pointermove',pmove); panel.addEventListener('pointerup',pup); panel.addEventListener('pointercancel',pup); panel.addEventListener('keydown',key); assist.addEventListener('click', assistHandler);
+    return () => { panel.removeEventListener('pointerdown',pdown); panel.removeEventListener('pointermove',pmove); panel.removeEventListener('pointerup',pup); panel.removeEventListener('pointercancel',pup); panel.removeEventListener('keydown',key); assist.removeEventListener('click', assistHandler); };
   }
 
   function renderStage5() {
@@ -382,10 +580,12 @@
           <div class="building-sign">LIGHTS OUT · STARS ON</div>
           <div class="windows-grid">${Array.from({length:12},(_,i)=>`<button class="building-window" data-i="${i}" type="button" aria-label="${i+1}번째 불 끄기"></button>`).join('')}</div>
         </div>
+        <button class="stage-assist-action" id="stage5Assist" type="button">🌙 남은 불 모두 끄기</button>
         <span class="scene-caption" style="color:#56657f">05 · ONE LAST LIGHT</span>
       </div>`;
     const scene = document.getElementById('buildingStage');
     const buttons = [...scene.querySelectorAll('.building-window')];
+    const assist = document.getElementById('stage5Assist');
     const sky = [...scene.querySelectorAll('.city-stars i')];
     const handlers = [];
     let offCount = 0;
@@ -400,7 +600,12 @@
       };
       handlers.push([btn,handler]); btn.addEventListener('click',handler);
     });
-    return () => handlers.forEach(([b,h]) => b.removeEventListener('click',h));
+    const assistHandler = () => {
+      if (stageSolved) return;
+      buttons.filter(btn => !btn.classList.contains('off')).forEach((btn, i) => setTimeout(() => btn.click(), i * 70));
+    };
+    assist.addEventListener('click', assistHandler);
+    return () => { handlers.forEach(([b,h]) => b.removeEventListener('click',h)); assist.removeEventListener('click', assistHandler); };
   }
 
 
@@ -476,6 +681,8 @@
   function enterEnding() {
     getParticipationCode();
     renderRegistrationState();
+    if (els.privateParticipationCode) els.privateParticipationCode.textContent = getParticipationCode();
+    loadPublicCount();
     showScreen(els.ending);
     // 사용자가 공유 버튼을 눌렀을 때 바로 시스템 공유창을 띄울 수 있도록 미리 생성합니다.
     prepareShareAsset().catch(() => {});
@@ -534,7 +741,7 @@
       showToast('5개의 별을 모두 찾은 뒤 등록할 수 있습니다.');
       return;
     }
-    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(CONFIG.submissionEndpoint)) {
+    if (!isValidEndpoint()) {
       showToast('참여자 저장 서버 연결이 필요합니다. README의 설정 방법을 확인해주세요.');
       els.registrationStatus.classList.add('needs-setup');
       els.registrationStatusText.textContent = '관리자 설정 필요 · config.js에 Apps Script 웹 앱 /exec 주소를 입력해주세요.';
@@ -573,6 +780,7 @@
       setRegisteredLocal(true);
       playSuccess();
       showToast('에너지 기록이 등록되었습니다!');
+      setTimeout(loadPublicCount, 900);
       els.participantName.value = '';
       els.participantPhone.value = '';
     } catch (err) {
@@ -802,10 +1010,34 @@
     if (els.select.classList.contains('active')) renderStageSelect();
   });
   els.hintBtn.addEventListener('click', () => {
-    const isHidden = els.hintText.hidden;
-    els.hintText.hidden = !isHidden;
-    els.hintBtn.setAttribute('aria-expanded', String(isHidden));
+    if (els.hintText.hidden) revealHint(1, false);
+    else {
+      els.hintText.hidden = true;
+      els.hintBtn.setAttribute('aria-expanded', 'false');
+    }
     playClick();
+  });
+
+  els.introHelp?.addEventListener('click', () => openHelpDialog(false));
+  els.helpBtn?.addEventListener('click', () => openHelpDialog(false));
+  els.helpClose?.addEventListener('click', () => els.helpDialog.close());
+  els.helpDialog?.addEventListener('click', e => { if (e.target === els.helpDialog) els.helpDialog.close(); });
+  els.easyControl?.addEventListener('click', () => setEasyControl(!easyControlOn));
+  els.assistControl?.addEventListener('click', () => setEasyControl(!easyControlOn));
+  els.showHintNow?.addEventListener('click', () => { els.helpDialog.close(); revealHint(2, true); });
+  els.alternative?.addEventListener('click', () => openHelpDialog(true));
+  els.pledgeChoices.forEach(btn => btn.addEventListener('click', () => completeStageByPledge(btn.dataset.pledge || '에너지 절약 실천')));
+  els.privateInstagram?.addEventListener('click', () => {
+    els.privateParticipationCode.textContent = getParticipationCode();
+    els.privateInstagramDialog.showModal();
+  });
+  els.privateInstagramClose?.addEventListener('click', () => els.privateInstagramDialog.close());
+  els.privateInstagramDone?.addEventListener('click', () => els.privateInstagramDialog.close());
+  els.privateInstagramDialog?.addEventListener('click', e => { if (e.target === els.privateInstagramDialog) els.privateInstagramDialog.close(); });
+  els.copyPrivateCode?.addEventListener('click', async () => {
+    const code = getParticipationCode();
+    try { await navigator.clipboard.writeText(code); showToast('참여코드를 복사했습니다.'); }
+    catch (_) { showToast(`참여코드: ${code}`); }
   });
 
   els.entryForm.addEventListener('submit', submitEntry);
@@ -822,6 +1054,8 @@
   els.downloadCard.addEventListener('click', downloadShareCard);
   els.nativeShare.addEventListener('click', handleFallbackShare);
   updateParticipantLabels();
+  setEasyControl(easyControlOn, false);
+  loadPublicCount();
 
   renderStageSelect();
 })();

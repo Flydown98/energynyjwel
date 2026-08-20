@@ -10,7 +10,8 @@
     assistanceKey: 'lightsOutStarsOnAssistance-v1',
     submissionEndpoint: APP.appsScriptUrl || '',
     privacyPolicyUrl: APP.privacyPolicyUrl || 'https://nyjwel.or.kr/privacy',
-    shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약', '#에너지절약캠페인'],
+    instagramHandle: APP.instagramHandle || '@nyjwel',
+    shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약챌린지', '#에너지절약'],
     clearDelay: 700,
     nextDelay: 3200,
   };
@@ -149,6 +150,7 @@
   let toastTimer = null;
   let cachedShareBlob = null;
   let cachedShareFile = null;
+  let shareAssetReady = false;
   let helpTimers = [];
   let publicCount = null;
   let easyControlOn = loadEasyControl();
@@ -716,6 +718,7 @@
     try { localStorage.removeItem(CONFIG.participationKey); } catch (_) {}
     cachedShareBlob = null;
     cachedShareFile = null;
+    shareAssetReady = false;
     els.participantName.value = '';
     els.participantPhone.value = '';
     els.privacyConsent.checked = false;
@@ -748,8 +751,20 @@
     if (els.privateParticipationCode) els.privateParticipationCode.textContent = getParticipationCode();
     loadPublicCount();
     showScreen(els.ending);
-    // 사용자가 공유 버튼을 눌렀을 때 바로 시스템 공유창을 띄울 수 있도록 미리 생성합니다.
-    prepareShareAsset().catch(() => {});
+    // 사용자가 Instagram 인증 버튼을 누르는 즉시 시스템 공유창을 띄울 수 있도록 미리 생성합니다.
+    shareAssetReady = false;
+    if (els.instagram) {
+      els.instagram.disabled = true;
+      const small = els.instagram.querySelector('small');
+      if (small) small.textContent = '인증 이미지 미리 준비 중…';
+    }
+    prepareShareAsset().catch(() => {
+      if (els.instagram) {
+        els.instagram.disabled = false;
+        const small = els.instagram.querySelector('small');
+        if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
+      }
+    });
   }
 
   function normalizePhone(value) {
@@ -860,13 +875,20 @@
 
   function buildShareCaption(code = getParticipationCode()) {
     return [
-      '✨ 불을 끄고 별을 켜다 · 5/5 STARS CLEAR!',
+      '⭐ ENERGY STAR CHALLENGE 완료!',
       '',
-      `${CONFIG.organization} 에너지 절약 미니게임에서 다섯 개의 별을 모두 찾았습니다.`,
-      '사용하지 않는 조명과 전자기기는 OFF, 여름철 실내 적정온도는 26℃!',
+      '불을 끄고 별을 켜다 🌎',
+      `${CONFIG.organization} 에너지 절약 미니게임에서 5개의 별을 모두 찾았습니다.`,
       '',
-      `참여코드: ${code}`,
+      '💡 사용하지 않는 조명은 OFF',
+      '🌡️ 여름철 실내 적정온도는 26℃',
+      '🔌 사용하지 않는 전자기기의 대기전력 줄이기',
+      '🪟 냉방 중에는 문과 창문 닫기',
       '',
+      '오늘부터 일상 속 작은 에너지 절약을 실천합니다.',
+      `참여코드 : ${code}`,
+      '',
+      CONFIG.instagramHandle,
       CONFIG.shareHashtags.join(' '),
     ].join('\n');
   }
@@ -984,7 +1006,38 @@
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG 생성 실패')), 'image/png', 1);
     });
     cachedShareFile = new File([cachedShareBlob], `불을-끄고-별을-켜다-${code}.png`, { type: 'image/png' });
+    shareAssetReady = true;
+    if (els.instagram) {
+      els.instagram.disabled = false;
+      const small = els.instagram.querySelector('small');
+      if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
+    }
     return cachedShareBlob;
+  }
+
+  function copyCaptionSynchronously(caption) {
+    // Web Share는 클릭 순간의 사용자 동작 권한이 중요합니다.
+    // 공유창을 열기 전에 동기 방식으로 캡션 복사를 먼저 시도합니다.
+    const ta = document.createElement('textarea');
+    ta.value = caption;
+    ta.setAttribute('readonly', '');
+    ta.setAttribute('aria-hidden', 'true');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus({ preventScroll: true });
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+    ta.remove();
+    if (!copied && navigator.clipboard?.writeText) {
+      // 실패하더라도 공유창 호출을 막지 않도록 await 하지 않습니다.
+      navigator.clipboard.writeText(caption).catch(() => {});
+    }
+    return copied;
   }
 
   async function copyCaptionToClipboard() {
@@ -1002,18 +1055,49 @@
     }
   }
 
-  async function nativeShare() {
-    await prepareShareAsset();
+  function buildNativeShareData() {
     const caption = buildShareCaption();
     els.shareCaption.value = caption;
-    // Instagram 앱은 공유받은 text를 항상 캡션에 넣지는 않으므로 먼저 클립보드에 복사합니다.
-    try { await navigator.clipboard.writeText(caption); } catch (_) {}
-    const data = { title: CONFIG.campaignName, text: caption, files: [cachedShareFile] };
-    const canFileShare = typeof navigator.share === 'function' && (!navigator.canShare || navigator.canShare({ files: [cachedShareFile] }));
-    if (canFileShare) {
+    return {
+      caption,
+      data: {
+        title: `${CONFIG.campaignName} · ENERGY STAR CHALLENGE`,
+        text: caption,
+        files: cachedShareFile ? [cachedShareFile] : undefined,
+      },
+    };
+  }
+
+  function canUseNativeFileShare() {
+    if (typeof navigator.share !== 'function' || !cachedShareFile) return false;
+    try {
+      return !navigator.canShare || navigator.canShare({ files: [cachedShareFile] });
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function nativeShare({ showFallback = true } = {}) {
+    if (!shareAssetReady || !cachedShareFile) {
+      if (showFallback) {
+        els.instagram.disabled = true;
+        const small = els.instagram.querySelector('small');
+        if (small) small.textContent = '인증 이미지 준비 중…';
+        try { await prepareShareAsset(); }
+        finally {
+          els.instagram.disabled = false;
+          if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
+        }
+      } else return false;
+    }
+
+    const { caption, data } = buildNativeShareData();
+    copyCaptionSynchronously(caption);
+
+    if (canUseNativeFileShare()) {
       try {
         await navigator.share(data);
-        showToast('공유 완료! 문구도 클립보드에 복사해두었습니다.');
+        showToast('인증 이미지를 공유했습니다. 게시글 문구도 복사해두었습니다.');
         return true;
       } catch (err) {
         if (err?.name === 'AbortError') return false;
@@ -1035,21 +1119,29 @@
   }
 
   async function handleInstagramShare() {
-    if (!loadParticipation()?.registered) showToast('경품 추첨 참여를 위해 기록 등록을 먼저 권장합니다.');
-    await prepareShareAsset();
-    const shared = await nativeShare();
+    if (!loadParticipation()?.registered) {
+      showToast('경품 추첨 참여를 위해 먼저 에너지 기록을 등록해주세요.');
+    }
+
+    // 모바일에서는 한 번의 버튼으로 "캡션 복사 + 인증 이미지 전달 + 시스템 공유창"까지 진행합니다.
+    const shared = await nativeShare({ showFallback: true });
     if (!shared) {
       els.shareCaption.value = buildShareCaption();
+      // 브라우저/PC에서 파일 공유가 지원되지 않거나 사용자가 공유창을 닫았을 때 대체 화면 제공
       els.shareDialog.showModal();
     }
   }
 
   async function handleFallbackShare() {
-    const shared = await nativeShare();
+    const shared = await nativeShare({ showFallback: true });
     if (!shared) {
       await copyCaptionToClipboard();
       downloadShareCard();
-      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        showToast('이미지와 문구를 준비했습니다. Instagram 앱에서 새 게시물을 만들어주세요.');
+      } else {
+        window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      }
     } else if (els.shareDialog.open) {
       els.shareDialog.close();
     }

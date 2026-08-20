@@ -1198,3 +1198,21 @@ html[data-layout="mobile"][data-orientation="portrait"] .clear-learning span { f
 }
 html[data-layout="mobile"][data-orientation="portrait"] .stage-english { left: 15px; bottom: 39px; font-size: 7px; }
 html[data-layout="mobile"][data-orientation="portrait"] .stage-name { font-size: 12px; }
+
+/* Instagram one-tap share UX */
+.instagram-btn:disabled {
+  opacity: .68;
+  cursor: wait;
+  filter: saturate(.78);
+}
+.instagram-btn:disabled::after {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: share-spin .8s linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes share-spin { to { transform: rotate(360deg); } }

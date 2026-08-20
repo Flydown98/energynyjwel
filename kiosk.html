@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07152d" />
   <meta name="description" content="불을 끄고 별을 켜다 - 5개의 짧은 에너지 절약 퍼즐 웹게임" />
-  <title>불을 끄고 별을 켜다</title>
+  <title>불을 끄고 별을 켜다 · KIOSK</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="kiosk.css" />
 </head>
-<body>
+<body class="kiosk-body">
   <div id="app" class="app-shell">
     <header class="topbar">
       <button id="homeBtn" class="brand" type="button" aria-label="처음 화면으로">
@@ -28,9 +29,9 @@
       <section id="introScreen" class="screen intro-screen active" aria-labelledby="introTitle">
         <div class="intro-stars" aria-hidden="true"></div>
         <div class="intro-card">
-          <p class="eyebrow">ENERGY DAY · MINI PUZZLE</p>
+          <p class="eyebrow">ENERGY DAY · KIOSK CHALLENGE</p>
           <h1 id="introTitle">불을 끄고<br><span>별을 켜다.</span></h1>
-          <p class="intro-copy">5개의 짧은 게임을 통해 <b>일상에서 바로 실천할 수 있는 에너지 절약 방법</b>을 알아봅니다.<br>각 단계에서 <b>왜 필요한지</b>와 <b>무엇을 해야 하는지</b> 먼저 안내해드려요.</p>
+          <p class="intro-copy">복지관 현장에서 5개의 에너지 절약 게임 중 <b>원하는 게임부터</b> 골라 참여해보세요.<br>모두 완료하면 현장 참여 정보를 등록할 수 있습니다.</p>
           <div class="intro-learning" aria-label="게임에서 배우는 에너지 절약 방법">
             <span>💡 조명 끄기</span><span>🌡️ 적정온도 26℃</span><span>🔌 대기전력 줄이기</span><span>🪟 냉방 중 창문 닫기</span>
           </div>
@@ -299,6 +300,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
 
+  <script>window.CAMPAIGN_MODE = 'kiosk';</script>
   <script src="config.js"></script>
   <script src="game.js"></script>
 </body>

@@ -3,32 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="robots" content="noindex,nofollow,noarchive" />
-  <title>캠페인 관리자 연결</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07152d;color:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}.card{width:min(92vw,560px);padding:34px;border:1px solid #29436a;border-radius:22px;background:#0d2144;box-shadow:0 24px 70px #0006}.star{font-size:40px;color:#ffd95a}.eyebrow{font-size:12px;letter-spacing:.18em;color:#88a8d8}.card h1{margin:.35rem 0 .6rem;font-size:28px}.card p{line-height:1.7;color:#c7d5ea}.card code{word-break:break-all;color:#ffe48b}.btn{display:inline-flex;margin-top:10px;padding:13px 18px;border:0;border-radius:12px;background:#fff;color:#0b1730;font-weight:800;text-decoration:none}.error{color:#ffb6b6}
-  </style>
+  <meta name="robots" content="noindex,nofollow" />
+  <title>캠페인 관리자 이동</title>
+  <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07152d;color:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}.box{text-align:center;padding:32px}.box b{color:#ffd324}.box p{color:#9cadc9;line-height:1.7}</style>
 </head>
 <body>
-  <main class="card">
-    <div class="star">✦</div><div class="eyebrow">CAMPAIGN ADMIN</div>
-    <h1>관리자 페이지로 이동합니다.</h1>
-    <p id="msg">Apps Script 관리자 페이지를 확인하고 있습니다.</p>
-    <a id="go" class="btn" href="#" hidden>관리자 페이지 열기</a>
-  </main>
+  <div class="box"><b>ADMIN</b><h1>관리자 페이지로 이동합니다.</h1><p>잠시만 기다려주세요.</p></div>
   <script src="config.js"></script>
   <script>
-    const base = window.CAMPAIGN_APP_CONFIG?.appsScriptUrl || '';
-    const ok = /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(base);
-    const msg = document.getElementById('msg'); const go = document.getElementById('go');
-    if (!ok) {
-      msg.className='error';
-      msg.innerHTML='아직 Apps Script 주소가 설정되지 않았습니다.<br><code>config.js</code>의 <code>appsScriptUrl</code>에 배포된 <code>/exec</code> 주소를 입력해주세요.';
-    } else {
-      const url = base + (base.includes('?') ? '&' : '?') + 'page=admin';
-      go.href=url; go.hidden=false; msg.textContent='관리자 로그인 페이지로 이동합니다.';
-      setTimeout(()=>location.replace(url),450);
-    }
+    (() => {
+      const base = window.CAMPAIGN_APP_CONFIG?.appsScriptUrl || '';
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(base)) {
+        document.querySelector('.box p').textContent = 'config.js의 Apps Script URL을 확인해주세요.';
+        return;
+      }
+      const joiner = base.includes('?') ? '&' : '?';
+      location.replace(`${base}${joiner}page=admin`);
+    })();
   </script>
 </body>
 </html>

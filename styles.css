@@ -1216,3 +1216,71 @@ html[data-layout="mobile"][data-orientation="portrait"] .stage-name { font-size:
   flex: 0 0 auto;
 }
 @keyframes share-spin { to { transform: rotate(360deg); } }
+
+/* ===== 자유 선택 / 완료 복귀 / 중복 참여 방지 UI ===== */
+.resume-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 18px;
+  border: 1px solid rgba(255,211,36,.36);
+  border-radius: 16px;
+  background: rgba(255,211,36,.1);
+  color: #ffe16a;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .2s ease;
+}
+.resume-btn:hover { background: rgba(255,211,36,.16); transform: translateY(-1px); }
+.resume-btn[hidden] { display: none !important; }
+.intro-completion-notice {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 13px 15px;
+  border: 1px solid rgba(130,154,194,.22);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+  text-align: left;
+}
+.intro-completion-notice[hidden] { display: none !important; }
+.intro-completion-notice b { color: #f4f7ff; font-size: 12px; }
+.intro-completion-notice span { color: #94a7c6; font-size: 10px; line-height: 1.5; }
+.intro-completion-notice.ready { border-color: rgba(255,211,36,.26); background: rgba(255,211,36,.055); }
+.intro-completion-notice.registered { border-color: rgba(79,201,151,.28); background: rgba(79,201,151,.055); }
+.intro-completion-notice.completed { border-color: rgba(99,210,161,.42); background: rgba(99,210,161,.09); }
+.intro-completion-notice.completed b { color: #8cf0bd; }
+.select-guide-copy { margin: 7px 0 9px !important; color: #8fa4c7 !important; font-size: 11px !important; line-height: 1.6; }
+.stage-tile:not(.cleared) { cursor: pointer; }
+.stage-tile:not(.cleared):hover { border-color: rgba(255,211,36,.3); }
+.share-completion-banner {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 15px;
+  text-align: left;
+}
+.share-completion-banner[hidden] { display: none !important; }
+.share-completion-banner b { font-size: 12px; }
+.share-completion-banner span { font-size: 10px; line-height: 1.5; color: #a6b5cb; }
+.share-completion-banner.ready { border: 1px solid rgba(255,211,36,.3); background: rgba(255,211,36,.075); }
+.share-completion-banner.ready b { color: #ffe16a; }
+.share-completion-banner.done { border: 1px solid rgba(80,210,151,.34); background: rgba(80,210,151,.08); }
+.share-completion-banner.done b { color: #83ebb7; }
+.registration-status.shared { border-color: rgba(80,210,151,.34); }
+.kiosk-next-wrap { display: grid; gap: 8px; margin-top: 18px; text-align: center; }
+.kiosk-next-wrap[hidden] { display: none !important; }
+.kiosk-next-wrap small { color: #7f94b5; font-size: 10px; }
+.kiosk-next-btn { width: 100%; }
+.share-modal-foot { gap: 9px; flex-wrap: wrap; }
+.share-modal-foot .secondary-btn { min-height: 42px; }
+
+@media (max-width: 760px) {
+  .resume-btn { min-height: 54px; font-size: 13px; }
+  .intro-completion-notice { padding: 14px; }
+  .intro-completion-notice b { font-size: 13px; }
+  .intro-completion-notice span { font-size: 11px; }
+  .select-guide-copy { font-size: 12px !important; }
+  .share-completion-banner b { font-size: 13px; }
+  .share-completion-banner span { font-size: 11px; }
+}

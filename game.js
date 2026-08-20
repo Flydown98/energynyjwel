@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  const GAME_MODE = window.CAMPAIGN_MODE === 'kiosk' ? 'kiosk' : 'web';
+  const IS_KIOSK = GAME_MODE === 'kiosk';
   const APP = window.CAMPAIGN_APP_CONFIG || {};
   const CONFIG = {
     organization: APP.organization || '남양주시장애인복지관',
@@ -14,6 +16,7 @@
     shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약챌린지', '#에너지절약'],
     clearDelay: 700,
     nextDelay: 3200,
+    kioskResetDelay: 20000,
   };
 
   const stages = [
@@ -71,6 +74,8 @@
     game: document.getElementById('gameScreen'),
     ending: document.getElementById('endingScreen'),
     start: document.getElementById('startBtn'),
+    resume: document.getElementById('resumeBtn'),
+    introCompletionNotice: document.getElementById('introCompletionNotice'),
     home: document.getElementById('homeBtn'),
     back: document.getElementById('backBtn'),
     reset: document.getElementById('resetBtn'),
@@ -106,6 +111,10 @@
     privacyClose: document.getElementById('privacyCloseBtn'),
     privacyAgree: document.getElementById('privacyAgreeBtn'),
     instagram: document.getElementById('instagramBtn'),
+    shareCompletionBanner: document.getElementById('shareCompletionBanner'),
+    shareDone: document.getElementById('shareDoneBtn'),
+    kioskNextWrap: document.getElementById('kioskNextWrap'),
+    kioskNext: document.getElementById('kioskNextBtn'),
     register: document.getElementById('registerBtn'),
     participationCode: document.getElementById('participationCode'),
     previewCode: document.getElementById('previewCode'),
@@ -141,6 +150,10 @@
     copyPrivateCode: document.getElementById('copyPrivateCodeBtn'),
   };
 
+  let kioskProgressMemory = { cleared: [] };
+  let kioskParticipationMemory = null;
+  let kioskEasyControlMemory = false;
+  let kioskResetTimer = null;
   let progress = loadProgress();
   let currentStage = null;
   let stageSolved = false;
@@ -155,7 +168,9 @@
   let publicCount = null;
   let easyControlOn = loadEasyControl();
 
-  els.orgName.textContent = `${CONFIG.organization} · 에너지 절약 미니게임`;
+  document.documentElement.dataset.mode = GAME_MODE;
+  document.body.dataset.mode = GAME_MODE;
+  els.orgName.textContent = IS_KIOSK ? `${CONFIG.organization} · KIOSK MODE` : `${CONFIG.organization} · 에너지 절약 미니게임`;
 
   // PC / 모바일 자동 레이아웃 전환
   // 화면 폭뿐 아니라 터치 포인터와 회전 상태까지 감지해 스마트폰/태블릿에서 레이아웃을 자동 변경합니다.
@@ -182,6 +197,7 @@
 
 
   function loadEasyControl() {
+    if (IS_KIOSK) return kioskEasyControlMemory;
     try { return localStorage.getItem(CONFIG.assistanceKey) === 'on'; }
     catch (_) { return false; }
   }
@@ -189,7 +205,8 @@
   function setEasyControl(enabled, announce = true) {
     easyControlOn = Boolean(enabled);
     document.documentElement.dataset.assist = easyControlOn ? 'on' : 'off';
-    try { localStorage.setItem(CONFIG.assistanceKey, easyControlOn ? 'on' : 'off'); } catch (_) {}
+    if (IS_KIOSK) kioskEasyControlMemory = easyControlOn;
+    else try { localStorage.setItem(CONFIG.assistanceKey, easyControlOn ? 'on' : 'off'); } catch (_) {}
     if (els.easyControl) {
       els.easyControl.setAttribute('aria-pressed', String(easyControlOn));
       els.easyControl.classList.toggle('active', easyControlOn);
@@ -266,11 +283,13 @@
   function completeStageByPledge(pledge) {
     if (!currentStage || stageSolved) return;
     const stageId = currentStage;
-    try {
-      const history = JSON.parse(localStorage.getItem('lightsOutStarsOnPledges-v1') || '[]');
-      history.push({ stage: stageId, pledge, at: new Date().toISOString() });
-      localStorage.setItem('lightsOutStarsOnPledges-v1', JSON.stringify(history.slice(-20)));
-    } catch (_) {}
+    if (!IS_KIOSK) {
+      try {
+        const history = JSON.parse(localStorage.getItem('lightsOutStarsOnPledges-v1') || '[]');
+        history.push({ stage: stageId, pledge, at: new Date().toISOString() });
+        localStorage.setItem('lightsOutStarsOnPledges-v1', JSON.stringify(history.slice(-20)));
+      } catch (_) {}
+    }
     els.helpDialog?.close();
     showToast(`“${pledge}” 실천으로 별을 켭니다.`);
     setTimeout(() => completeStage(stageId), 420);
@@ -312,14 +331,16 @@
   }
 
   function loadProgress() {
+    if (IS_KIOSK) return { cleared: [...kioskProgressMemory.cleared] };
     try {
       const saved = JSON.parse(localStorage.getItem(CONFIG.storageKey));
-      if (saved && Array.isArray(saved.cleared)) return { cleared: saved.cleared.filter(n => n >= 1 && n <= 5) };
+      if (saved && Array.isArray(saved.cleared)) return { cleared: [...new Set(saved.cleared.filter(n => n >= 1 && n <= 5))] };
     } catch (_) {}
     return { cleared: [] };
   }
 
   function saveProgress() {
+    if (IS_KIOSK) { kioskProgressMemory = { cleared: [...progress.cleared] }; return; }
     try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(progress)); }
     catch (_) { /* 저장소가 차단된 환경에서도 게임은 계속 진행 */ }
   }
@@ -330,22 +351,22 @@
   }
 
   function isUnlocked(id) {
-    return id === 1 || progress.cleared.includes(id) || progress.cleared.includes(id - 1);
+    return stages.some(stage => stage.id === id);
   }
 
   function renderStageSelect() {
     els.stageGrid.innerHTML = '';
     stages.forEach(stage => {
       const cleared = progress.cleared.includes(stage.id);
-      const unlocked = isUnlocked(stage.id);
+      const unlocked = true;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `stage-tile${cleared ? ' cleared' : ''}`;
-      btn.disabled = !unlocked;
-      btn.setAttribute('aria-label', `스테이지 ${stage.id} ${stage.title}${cleared ? ', 완료' : unlocked ? '' : ', 잠김'}`);
+      btn.disabled = false;
+      btn.setAttribute('aria-label', `스테이지 ${stage.id} ${stage.label}${cleared ? ', 완료' : ', 선택 가능'}`);
       btn.innerHTML = `
         <span class="stage-number">${String(stage.id).padStart(2, '0')}</span>
-        <span class="stage-icon" aria-hidden="true">${cleared ? '★' : unlocked ? '✦' : '×'}</span>
+        <span class="stage-icon" aria-hidden="true">${cleared ? '★' : '✦'}</span>
         <span class="stage-name">${stage.label}</span>
         <span class="stage-english">${stage.title}</span>`;
       btn.addEventListener('click', () => openStage(stage.id));
@@ -353,6 +374,7 @@
     });
     els.starCount.textContent = progress.cleared.length;
     els.constellation.innerHTML = Array.from({length: 5}, (_, i) => `<i class="${progress.cleared.includes(i + 1) ? 'on' : ''}"></i>`).join('');
+    renderIntroState();
   }
 
   function goSelect() {
@@ -412,7 +434,7 @@
     setTimeout(() => {
       els.clearOverlay.classList.remove('show');
       els.clearOverlay.setAttribute('aria-hidden', 'true');
-      if (id === 5 && progress.cleared.length === 5) enterEnding();
+      if (progress.cleared.length === 5) enterEnding();
       else goSelect();
     }, CONFIG.clearDelay + CONFIG.nextDelay);
   }
@@ -677,6 +699,7 @@
 
   // ---------- Ending / registration / Instagram share ----------
   function loadParticipation() {
+    if (IS_KIOSK) return kioskParticipationMemory ? { ...kioskParticipationMemory } : null;
     try {
       const saved = JSON.parse(localStorage.getItem(CONFIG.participationKey));
       if (saved && typeof saved.code === 'string') return saved;
@@ -685,8 +708,9 @@
   }
 
   function saveParticipation(data) {
+    if (IS_KIOSK) { kioskParticipationMemory = { ...data }; return; }
     try { localStorage.setItem(CONFIG.participationKey, JSON.stringify(data)); }
-    catch (_) { /* 참여코드만 로컬 저장. 이름/전화번호는 저장하지 않음 */ }
+    catch (_) { /* 참여코드/등록·공유 상태만 저장하며 이름·전화번호는 저장하지 않음 */ }
   }
 
   function generateParticipationCode() {
@@ -712,10 +736,105 @@
     data.updatedAt = new Date().toISOString();
     saveParticipation(data);
     renderRegistrationState();
+    renderIntroState();
+  }
+
+  function setSharedLocal(shared = true) {
+    if (IS_KIOSK) return;
+    const data = loadParticipation() || { code: getParticipationCode(), createdAt: new Date().toISOString() };
+    data.sharedAt = shared ? (data.sharedAt || new Date().toISOString()) : '';
+    data.updatedAt = new Date().toISOString();
+    saveParticipation(data);
+    renderRegistrationState();
+    renderIntroState();
+  }
+
+  async function notifyShareComplete() {
+    if (IS_KIOSK || !isValidEndpoint()) return;
+    const code = getParticipationCode();
+    const body = new URLSearchParams({
+      action: 'markShare',
+      code,
+      source: GAME_MODE,
+      sharedAt: new Date().toISOString(),
+    });
+    try {
+      await fetch(CONFIG.submissionEndpoint, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: body.toString(), cache: 'no-store'
+      });
+    } catch (_) { /* 로컬 공유 완료 표시는 유지 */ }
+  }
+
+  function markShareComplete() {
+    if (IS_KIOSK) return;
+    setSharedLocal(true);
+    notifyShareComplete();
+    if (els.shareDialog?.open) els.shareDialog.close();
+    showToast('Instagram 인증 완료로 표시했습니다. 중복 응모는 제한됩니다.');
+  }
+
+  function renderIntroState() {
+    if (!els.resume || !els.introCompletionNotice) return;
+    if (IS_KIOSK) {
+      els.resume.hidden = true;
+      els.introCompletionNotice.hidden = false;
+      els.introCompletionNotice.innerHTML = '<b>KIOSK MODE</b><span>참여자마다 진행상황과 입력정보를 새로 시작하며, 이 기기에는 저장하지 않습니다.</span>';
+      return;
+    }
+
+    const complete = progress.cleared.length === 5;
+    const data = loadParticipation();
+    const registered = Boolean(data?.registered);
+    const shared = Boolean(data?.sharedAt);
+    els.resume.hidden = !complete;
+    els.introCompletionNotice.hidden = !(complete || registered || shared);
+
+    if (shared) {
+      els.resume.textContent = '✓ 참여 완료 내용 보기';
+      els.introCompletionNotice.className = 'intro-completion-notice completed';
+      els.introCompletionNotice.innerHTML = '<b>이미 참여를 완료했어요.</b><span>이 브라우저에서는 기록 등록과 Instagram 인증이 완료되어 중복 응모가 제한됩니다.</span>';
+      els.start.innerHTML = '게임 다시보기 <span>→</span>';
+    } else if (registered) {
+      els.resume.textContent = '기록 등록 완료 · Instagram 인증으로 이동';
+      els.introCompletionNotice.className = 'intro-completion-notice registered';
+      els.introCompletionNotice.innerHTML = '<b>에너지 기록 등록 완료</b><span>별 5개를 모두 모았다면 Instagram 인증을 이어서 진행할 수 있어요.</span>';
+      els.start.innerHTML = '게임 다시보기 <span>→</span>';
+    } else if (complete) {
+      els.resume.textContent = '★ 별 5개 완료 · 기록/공유 화면으로';
+      els.introCompletionNotice.className = 'intro-completion-notice ready';
+      els.introCompletionNotice.innerHTML = '<b>5개의 별을 모두 찾았어요!</b><span>기록 등록과 Instagram 인증을 이어서 진행해주세요.</span>';
+      els.start.innerHTML = '스테이지 다시 보기 <span>→</span>';
+    } else {
+      els.introCompletionNotice.className = 'intro-completion-notice';
+      els.start.innerHTML = '5개 게임 골라서 시작하기 <span>→</span>';
+    }
+  }
+
+  function resetKioskSession({ goHome = true } = {}) {
+    if (!IS_KIOSK) return;
+    if (kioskResetTimer) clearTimeout(kioskResetTimer);
+    kioskResetTimer = null;
+    cleanupCurrentStage();
+    kioskProgressMemory = { cleared: [] };
+    progress = { cleared: [] };
+    kioskParticipationMemory = null;
+    cachedShareBlob = null; cachedShareFile = null; shareAssetReady = false;
+    els.participantName.value = '';
+    els.participantPhone.value = '';
+    els.privacyConsent.checked = false;
+    els.websiteField.value = '';
+    setEasyControl(false, false);
+    renderStageSelect();
+    renderRegistrationState();
+    if (els.kioskNextWrap) els.kioskNextWrap.hidden = true;
+    if (goHome) showScreen(els.intro);
   }
 
   function resetParticipation() {
-    try { localStorage.removeItem(CONFIG.participationKey); } catch (_) {}
+    if (IS_KIOSK) kioskParticipationMemory = null;
+    else try { localStorage.removeItem(CONFIG.participationKey); } catch (_) {}
     cachedShareBlob = null;
     cachedShareFile = null;
     shareAssetReady = false;
@@ -727,43 +846,111 @@
   function renderRegistrationState() {
     const data = loadParticipation();
     const code = data?.code || getParticipationCode();
+    const registered = Boolean(data?.registered);
+    const shared = Boolean(data?.sharedAt);
+
     els.participationCode.textContent = code;
     els.previewCode.textContent = code;
-    const registered = Boolean(data?.registered);
     els.registrationStatus.classList.toggle('registered', registered);
-    els.registrationStatusText.textContent = registered
-      ? '기록 등록 완료 · 이 참여코드가 공유 이미지에도 표시됩니다.'
-      : '기록 등록 후 이 참여코드와 인스타그램 게시물을 대조합니다.';
+    els.registrationStatus.classList.toggle('shared', shared);
+
+    if (IS_KIOSK) {
+      els.registrationStatusText.textContent = registered
+        ? '현장 참여 등록 완료 · 다음 참여자를 위해 자동으로 새 세션을 준비합니다.'
+        : '키오스크는 참여자마다 새로운 참여코드를 발급합니다.';
+    } else if (shared) {
+      els.registrationStatusText.textContent = '참여 및 Instagram 인증 완료 · 이 브라우저에서는 중복 응모가 제한됩니다.';
+    } else if (registered) {
+      els.registrationStatusText.textContent = '기록 등록 완료 · 이 참여코드가 공유 이미지에도 표시됩니다.';
+    } else {
+      els.registrationStatusText.textContent = '기록 등록 후 이 참여코드와 인스타그램 게시물을 대조합니다.';
+    }
+
     const label = els.register.querySelector('b');
     const small = els.register.querySelector('small');
-    if (registered) {
-      label.textContent = '나의 에너지 기록 수정하기';
+    if (shared && !IS_KIOSK) {
+      label.textContent = '참여 기록 등록 완료';
+      small.textContent = 'Instagram 인증까지 완료됨';
+      els.register.disabled = true;
+    } else if (registered && IS_KIOSK) {
+      label.textContent = '현장 참여 등록 완료';
+      small.textContent = '다음 참여자를 시작해주세요';
+      els.register.disabled = true;
+    } else if (registered) {
+      label.textContent = '등록 정보 수정하기';
       small.textContent = '같은 참여코드로 정보 갱신';
+      els.register.disabled = false;
     } else {
       label.textContent = '나의 에너지 기록 등록하기';
       small.textContent = '추첨 참여 정보 저장';
+      els.register.disabled = false;
     }
+
+    if (els.instagram) {
+      if (IS_KIOSK) {
+        els.instagram.disabled = true;
+      } else if (shared) {
+        els.instagram.disabled = true;
+        const b = els.instagram.querySelector('b');
+        const sm = els.instagram.querySelector('small');
+        if (b) b.textContent = 'Instagram 인증 완료';
+        if (sm) sm.textContent = '이미 공유 완료로 표시되었습니다';
+      } else {
+        const b = els.instagram.querySelector('b');
+        const sm = els.instagram.querySelector('small');
+        if (b) b.textContent = 'Instagram에 인증하기';
+        if (sm) sm.textContent = shareAssetReady ? '인증 이미지 준비 + 게시글 문구 자동 복사' : '인증 이미지 준비 중…';
+        els.instagram.disabled = !shareAssetReady;
+      }
+    }
+
+    if (els.shareCompletionBanner) {
+      if (IS_KIOSK) {
+        els.shareCompletionBanner.hidden = true;
+      } else if (shared) {
+        els.shareCompletionBanner.hidden = false;
+        els.shareCompletionBanner.className = 'share-completion-banner done';
+        els.shareCompletionBanner.innerHTML = '<b>✓ 참여 완료</b><span>이 기기에서는 Instagram 인증까지 완료한 것으로 기록되어 있습니다.</span>';
+      } else if (registered) {
+        els.shareCompletionBanner.hidden = false;
+        els.shareCompletionBanner.className = 'share-completion-banner ready';
+        els.shareCompletionBanner.innerHTML = '<b>1단계 완료</b><span>참여 기록이 등록되었습니다. 이제 Instagram 인증만 진행해주세요.</span>';
+      } else {
+        els.shareCompletionBanner.hidden = true;
+      }
+    }
+
+    if (els.kioskNextWrap) els.kioskNextWrap.hidden = !(IS_KIOSK && registered);
+    renderIntroState();
   }
 
   function enterEnding() {
+    if (progress.cleared.length !== 5) { goSelect(); return; }
     getParticipationCode();
-    renderRegistrationState();
     if (els.privateParticipationCode) els.privateParticipationCode.textContent = getParticipationCode();
     loadPublicCount();
     showScreen(els.ending);
-    // 사용자가 Instagram 인증 버튼을 누르는 즉시 시스템 공유창을 띄울 수 있도록 미리 생성합니다.
     shareAssetReady = false;
+
+    if (IS_KIOSK) {
+      renderRegistrationState();
+      return;
+    }
+
+    const alreadyShared = Boolean(loadParticipation()?.sharedAt);
+    if (alreadyShared) {
+      renderRegistrationState();
+      return;
+    }
+
     if (els.instagram) {
       els.instagram.disabled = true;
       const small = els.instagram.querySelector('small');
       if (small) small.textContent = '인증 이미지 미리 준비 중…';
     }
-    prepareShareAsset().catch(() => {
-      if (els.instagram) {
-        els.instagram.disabled = false;
-        const small = els.instagram.querySelector('small');
-        if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
-      }
+    prepareShareAsset().then(renderRegistrationState).catch(() => {
+      shareAssetReady = false;
+      renderRegistrationState();
     });
   }
 
@@ -816,6 +1003,11 @@
     event.preventDefault();
     const input = validateEntry();
     if (!input) return;
+    if (!IS_KIOSK && loadParticipation()?.sharedAt) {
+      showToast('이미 참여와 Instagram 인증을 완료했습니다. 중복 응모는 제한됩니다.');
+      renderRegistrationState();
+      return;
+    }
     if (progress.cleared.length !== 5) {
       showToast('5개의 별을 모두 찾은 뒤 등록할 수 있습니다.');
       return;
@@ -839,6 +1031,7 @@
       stars: '5',
       clientTimestamp: new Date().toISOString(),
       website: '',
+      source: GAME_MODE,
     });
 
     els.register.disabled = true;
@@ -858,10 +1051,14 @@
       });
       setRegisteredLocal(true);
       playSuccess();
-      showToast('에너지 기록이 등록되었습니다!');
+      showToast(IS_KIOSK ? '현장 참여가 등록되었습니다. 다음 참여자를 준비해주세요!' : '에너지 기록이 등록되었습니다!');
       setTimeout(loadPublicCount, 900);
       els.participantName.value = '';
       els.participantPhone.value = '';
+      if (IS_KIOSK) {
+        if (kioskResetTimer) clearTimeout(kioskResetTimer);
+        kioskResetTimer = setTimeout(() => resetKioskSession({ goHome: true }), CONFIG.kioskResetDelay);
+      }
     } catch (err) {
       console.error(err);
       showToast('등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');
@@ -1007,11 +1204,7 @@
     });
     cachedShareFile = new File([cachedShareBlob], `불을-끄고-별을-켜다-${code}.png`, { type: 'image/png' });
     shareAssetReady = true;
-    if (els.instagram) {
-      els.instagram.disabled = false;
-      const small = els.instagram.querySelector('small');
-      if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
-    }
+    renderRegistrationState();
     return cachedShareBlob;
   }
 
@@ -1084,10 +1277,7 @@
         const small = els.instagram.querySelector('small');
         if (small) small.textContent = '인증 이미지 준비 중…';
         try { await prepareShareAsset(); }
-        finally {
-          els.instagram.disabled = false;
-          if (small) small.textContent = '인증 이미지 준비 + 게시글 문구 자동 복사';
-        }
+        finally { renderRegistrationState(); }
       } else return false;
     }
 
@@ -1097,7 +1287,8 @@
     if (canUseNativeFileShare()) {
       try {
         await navigator.share(data);
-        showToast('인증 이미지를 공유했습니다. 게시글 문구도 복사해두었습니다.');
+        markShareComplete();
+        showToast('공유가 완료되었습니다. 게시글 문구도 복사해두었습니다.');
         return true;
       } catch (err) {
         if (err?.name === 'AbortError') return false;
@@ -1119,8 +1310,16 @@
   }
 
   async function handleInstagramShare() {
-    if (!loadParticipation()?.registered) {
-      showToast('경품 추첨 참여를 위해 먼저 에너지 기록을 등록해주세요.');
+    if (IS_KIOSK) return;
+    const data = loadParticipation();
+    if (data?.sharedAt) {
+      showToast('이미 Instagram 인증을 완료했습니다.');
+      renderRegistrationState();
+      return;
+    }
+    if (!data?.registered) {
+      showToast('먼저 에너지 기록을 등록해주세요.');
+      return;
     }
 
     // 모바일에서는 한 번의 버튼으로 "캡션 복사 + 인증 이미지 전달 + 시스템 공유창"까지 진행합니다.
@@ -1149,10 +1348,17 @@
 
   // global controls
   els.start.addEventListener('click', () => { playClick(); goSelect(); });
-  els.home.addEventListener('click', () => { cleanupCurrentStage(); showScreen(els.intro); });
+  els.resume?.addEventListener('click', () => {
+    if (progress.cleared.length === 5) { playClick(); enterEnding(); }
+    else goSelect();
+  });
+  els.home.addEventListener('click', () => { cleanupCurrentStage(); renderIntroState(); showScreen(els.intro); });
   els.back.addEventListener('click', goSelect);
   els.endingStages.addEventListener('click', goSelect);
-  els.replay.addEventListener('click', () => { resetParticipation(); progress = { cleared: [] }; saveProgress(); goSelect(); });
+  els.replay.addEventListener('click', () => {
+    if (IS_KIOSK) { resetKioskSession({ goHome: false }); goSelect(); return; }
+    progress = { cleared: [] }; saveProgress(); renderIntroState(); goSelect();
+  });
   els.sound.addEventListener('click', () => {
     soundOn = !soundOn;
     els.sound.setAttribute('aria-pressed', String(soundOn));
@@ -1160,9 +1366,17 @@
     if (soundOn) { tone(440,.06,'sine',.025); showToast('소리 켜짐'); } else showToast('소리 꺼짐');
   });
   els.reset.addEventListener('click', () => {
-    const ok = window.confirm('찾은 별과 스테이지 진행상황을 모두 초기화할까요?');
+    const message = IS_KIOSK
+      ? '현재 참여자의 진행상황과 입력정보를 모두 지우고 새 참여자를 시작할까요?'
+      : '찾은 별과 스테이지 진행상황을 모두 초기화할까요? 참여 기록은 유지됩니다.';
+    const ok = window.confirm(message);
     if (!ok) return;
-    progress = { cleared: [] }; saveProgress(); showToast('진행상황을 초기화했습니다.');
+    if (IS_KIOSK) {
+      resetKioskSession({ goHome: true });
+      showToast('새 참여자용 화면으로 초기화했습니다.');
+      return;
+    }
+    progress = { cleared: [] }; saveProgress(); renderIntroState(); showToast('게임 진행상황을 초기화했습니다. 참여 기록은 유지됩니다.');
     if (els.select.classList.contains('active')) renderStageSelect();
   });
   els.hintBtn.addEventListener('click', () => {
@@ -1209,9 +1423,15 @@
   els.copyCaption.addEventListener('click', copyCaptionToClipboard);
   els.downloadCard.addEventListener('click', downloadShareCard);
   els.nativeShare.addEventListener('click', handleFallbackShare);
+  els.shareDone?.addEventListener('click', () => markShareComplete());
+  els.kioskNext?.addEventListener('click', () => resetKioskSession({ goHome: true }));
   updateParticipantLabels();
   setEasyControl(easyControlOn, false);
   loadPublicCount();
 
   renderStageSelect();
+  renderIntroState();
+  if (IS_KIOSK) {
+    document.querySelectorAll('.share-preview, .share-note, .instagram-btn, .event-rules, #privateInstagramBtn').forEach(el => el.hidden = true);
+  }
 })();

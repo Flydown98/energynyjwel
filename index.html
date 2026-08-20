@@ -30,7 +30,10 @@
         <div class="intro-card">
           <p class="eyebrow">ENERGY DAY · MINI PUZZLE</p>
           <h1 id="introTitle">불을 끄고<br><span>별을 켜다.</span></h1>
-          <p class="intro-copy">먼저 자유롭게 만져보며 별을 찾아보세요.<br>막히면 힌트와 도움 기능을 언제든 사용할 수 있습니다.</p>
+          <p class="intro-copy">5개의 짧은 게임을 통해 <b>일상에서 바로 실천할 수 있는 에너지 절약 방법</b>을 알아봅니다.<br>각 단계에서 <b>왜 필요한지</b>와 <b>무엇을 해야 하는지</b> 먼저 안내해드려요.</p>
+          <div class="intro-learning" aria-label="게임에서 배우는 에너지 절약 방법">
+            <span>💡 조명 끄기</span><span>🌡️ 적정온도 26℃</span><span>🔌 대기전력 줄이기</span><span>🪟 냉방 중 창문 닫기</span>
+          </div>
           <div class="intro-community" aria-live="polite"><strong id="publicParticipationCount">—</strong><span>명의 에너지 지킴이가 기록을 남겼어요</span></div>
           <button id="startBtn" class="primary-btn" type="button">START <span>→</span></button>
           <button id="introHelpBtn" class="intro-help-btn" type="button">플레이가 어려우신가요? <b>도움 기능 보기</b></button>
@@ -64,6 +67,16 @@
           </div>
         </div>
 
+        <aside id="stageGuide" class="stage-guide" aria-live="polite">
+          <div class="stage-guide-icon" id="stageGuideIcon" aria-hidden="true">💡</div>
+          <div class="stage-guide-copy">
+            <p class="stage-guide-kicker" id="stageGuideKicker">오늘의 에너지 실천</p>
+            <h3 id="stageGuideTitle">사용하지 않는 불 끄기</h3>
+            <p id="stageGuideWhy" class="stage-guide-why">사용하지 않는 조명을 끄면 불필요한 전력 소비를 줄일 수 있어요.</p>
+            <p id="stageGuideAction" class="stage-guide-action"><b>해보기</b> 방 안의 스위치를 눌러 불을 꺼보세요.</p>
+          </div>
+        </aside>
+
         <div id="gameFrame" class="game-frame" aria-live="polite"></div>
         <p id="hintText" class="hint-text" role="status" aria-live="polite" hidden></p>
         <div id="autoHelpActions" class="auto-help-actions" hidden>
@@ -85,9 +98,14 @@
           <div class="ending-layout">
             <div class="ending-left">
               <div class="pledge-box">
-                <span>오늘의 에너지 약속</span>
-                <strong>사용하지 않는 조명과 전자기기는 OFF</strong>
-                <strong>여름철 실내 적정온도는 26℃</strong>
+                <span>오늘 배운 에너지 절약 실천</span>
+                <ul class="ending-learning-list">
+                  <li>💡 사용하지 않는 조명은 바로 끄기</li>
+                  <li>🌡️ 여름철 실내 적정온도 26℃ 지키기</li>
+                  <li>🔌 사용하지 않는 전자기기의 대기전력 줄이기</li>
+                  <li>🪟 냉방 중에는 문과 창문 닫기</li>
+                  <li>⭐ 작은 실천을 가족·이웃과 함께 이어가기</li>
+                </ul>
                 <div class="community-impact"><b id="endingParticipationCount">—</b><small>명의 에너지 지킴이가 기록을 남겼습니다</small></div>
               </div>
 
@@ -263,6 +281,10 @@
       <div class="clear-star" aria-hidden="true"></div>
       <p>STAR FOUND</p>
       <strong id="clearStageText">01 / 05</strong>
+      <div class="clear-learning">
+        <b id="clearLearningTitle">에너지 절약 실천 완료!</b>
+        <span id="clearLearningText">사용하지 않는 불을 끄면 전기를 절약할 수 있어요.</span>
+      </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

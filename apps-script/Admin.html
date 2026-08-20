@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#07152d" />
+  <title>캠페인 관리자 · 불을 끄고 별을 켜다</title>
+  <style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Pretendard,"Noto Sans KR",system-ui,-apple-system,sans-serif;background:#07152d;color:#eef4ff}body{min-height:100vh;background:radial-gradient(circle at 80% 0,#132d57 0,transparent 38%),#07152d}button,input,select,textarea{font:inherit}.admin-shell{min-height:100vh}.admin-header{height:72px;padding:0 clamp(18px,4vw,54px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(4,14,32,.58);backdrop-filter:blur(16px);position:sticky;top:0;z-index:20}.admin-brand{display:flex;gap:12px;align-items:center}.brand-star{color:#ffd324;font-size:25px}.admin-brand strong{display:block;font-size:14px}.admin-brand small{display:block;margin-top:2px;color:#8193b3;font-size:9px;letter-spacing:.16em}.header-actions{display:flex;gap:10px;align-items:center}.admin-identity{font-size:11px;color:#98a9c5}.center-panel{min-height:calc(100vh - 72px);display:grid;place-items:center;padding:30px}.login-card{width:min(440px,100%);padding:34px;border:1px solid rgba(255,255,255,.12);border-radius:28px;background:rgba(12,31,62,.78);box-shadow:0 30px 80px rgba(0,0,0,.3)}.eyebrow{margin:0 0 10px;color:#ffd324;font-size:10px;font-weight:900;letter-spacing:.18em}.login-card h1,.dashboard-head h1{margin:0;letter-spacing:-.055em}.login-card h1{font-size:34px}.login-card>p:not(.eyebrow){color:#9fb0cb;line-height:1.7;font-size:13px}.login-card label{display:grid;gap:8px;margin-top:18px;color:#b7c3d7;font-size:12px;font-weight:800}.login-card input,.toolbar input,.toolbar select,.row-note{width:100%;border:1px solid rgba(255,255,255,.13);outline:0;background:#081a36;color:white;border-radius:12px}.login-card input{padding:14px}.login-card input:focus,.toolbar input:focus,.toolbar select:focus,.row-note:focus{border-color:#ffd324;box-shadow:0 0 0 3px rgba(255,211,36,.08)}.primary-btn,.ghost-btn,.danger-btn,.mini-btn{border:0;border-radius:12px;cursor:pointer;font-weight:900}.primary-btn{background:#ffd324;color:#091326;padding:14px 18px}.primary-btn.compact{padding:11px 16px}.login-card .primary-btn{width:100%;margin-top:22px}.ghost-btn{padding:10px 14px;background:rgba(255,255,255,.08);color:#dce6f5}.danger-btn{padding:11px 15px;background:#742d38;color:#fff}.status-text{display:block;min-height:18px;margin-top:10px;color:#ffb2b2;text-align:center}.dashboard{width:min(1480px,100%);margin:0 auto;padding:40px clamp(16px,3vw,40px) 70px}.dashboard-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end}.dashboard-head h1{font-size:clamp(35px,5vw,60px)}.dashboard-head>div>p:last-child{color:#91a4c3;margin:10px 0 0;font-size:13px}.dashboard-buttons{display:flex;gap:8px;flex-shrink:0}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.stats-grid article{padding:21px;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(11,29,58,.68)}.stats-grid span{display:block;color:#8ea1bf;font-size:11px}.stats-grid strong{display:block;margin-top:5px;font-size:30px;letter-spacing:-.05em}.toolbar{display:grid;grid-template-columns:minmax(260px,1fr) 160px 160px auto;gap:10px;align-items:end;margin-bottom:12px}.toolbar label{display:grid;gap:6px;color:#8396b5;font-size:10px;font-weight:900}.toolbar input,.toolbar select{height:43px;padding:0 12px}.toolbar-meta{height:43px;display:flex;align-items:center;justify-content:center;padding:0 15px;border-radius:12px;background:rgba(255,255,255,.06);color:#93a6c4;font-size:11px}.toolbar-meta b{color:#ffd324;margin-right:4px}.table-wrap{position:relative;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(5,19,42,.74)}table{width:100%;min-width:1180px;border-collapse:collapse}th{position:sticky;top:0;z-index:2;padding:12px 10px;background:#0e2346;color:#7f94b6;text-align:left;font-size:10px;letter-spacing:.04em}td{padding:11px 10px;border-top:1px solid rgba(255,255,255,.06);vertical-align:middle;font-size:12px}tbody tr:hover{background:rgba(255,255,255,.025)}.code-cell{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffd324;font-weight:800;white-space:nowrap}.phone-cell{white-space:nowrap}.date-cell{color:#8ea0bb;white-space:nowrap}.type-badge{display:inline-block;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:#b6c3d7;font-size:10px}.row-select{width:118px;padding:8px 9px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#0b1d3b;color:white;font-size:11px}.row-note{min-width:150px;padding:8px 9px;resize:vertical;min-height:38px;font-size:11px}.row-actions{display:flex;gap:5px}.mini-btn{padding:8px 9px;background:rgba(255,255,255,.08);color:#c9d4e5;font-size:10px;white-space:nowrap}.mini-btn.delete{background:rgba(199,65,83,.16);color:#ffb3bd}.empty-state{padding:60px;text-align:center;color:#8295b3}.privacy-admin-note{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:18px;padding:18px 20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035)}.privacy-admin-note strong{font-size:12px}.privacy-admin-note p{margin:5px 0 0;color:#8296b6;font-size:11px}.toast{position:fixed;left:50%;bottom:28px;z-index:50;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:12px 17px;border-radius:999px;background:#eef3fb;color:#0b1830;font-size:12px;font-weight:800;box-shadow:0 15px 40px rgba(0,0,0,.3);transition:.2s}.toast.show{transform:translate(-50%,0);opacity:1}code{padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.08);color:#ffd324}@media(max-width:850px){.admin-header{height:64px}.admin-identity{display:none}.dashboard{padding-top:25px}.dashboard-head{align-items:flex-start;flex-direction:column}.dashboard-buttons{width:100%}.dashboard-buttons button{flex:1}.stats-grid{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:1fr 1fr}.search-box{grid-column:1/-1}.toolbar-meta{grid-column:1/-1}.privacy-admin-note{align-items:stretch;flex-direction:column}.privacy-admin-note button{width:100%}}@media(max-width:480px){.admin-brand strong{font-size:12px}.login-card{padding:25px}.stats-grid article{padding:16px}.stats-grid strong{font-size:25px}}
+
+.sheet-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.password-only{max-width:430px}.security-note{margin-top:12px;color:#7e91aa;font-size:12px;line-height:1.6}.spinner{opacity:.7;pointer-events:none}.sheet-badge{font-size:12px;color:#91a8c8}.login-card input{font:inherit}.login-card .primary-btn{width:100%;justify-content:center}</style>
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-brand">
+        <span class="brand-star">✦</span>
+        <div><strong>불을 끄고 별을 켜다</strong><small>GOOGLE SHEETS ADMIN</small></div>
+      </div>
+      <div class="header-actions">
+        <span id="adminIdentity" class="admin-identity"></span>
+        <button id="logoutBtn" class="ghost-btn" type="button" hidden>로그아웃</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="loginPanel" class="center-panel">
+        <form id="loginForm" class="login-card password-only">
+          <p class="eyebrow">ADMIN ONLY</p>
+          <h1>관리자 로그인</h1>
+          <p>이름·전화번호 등 참여정보는 관리자 비밀번호 확인 후에만 이 페이지에서 조회할 수 있습니다.</p>
+          <label>관리자 비밀번호
+            <input id="adminPassword" type="password" autocomplete="current-password" required placeholder="관리자 비밀번호" />
+          </label>
+          <button id="loginBtn" class="primary-btn" type="submit">로그인</button>
+          <small id="loginStatus" class="status-text" aria-live="polite"></small>
+          <div class="security-note">관리자 비밀번호는 GitHub에 저장되지 않으며 Apps Script의 Script Properties에 해시 형태로 보관됩니다. 로그인 세션은 최대 6시간 유지됩니다.</div>
+        </form>
+      </section>
+
+      <section id="dashboardPanel" class="dashboard" hidden>
+        <div class="dashboard-head">
+          <div>
+            <p class="eyebrow">EVENT ENTRIES</p>
+            <h1>참여자 관리</h1>
+            <p>Google Sheet에 저장된 참여정보를 불러와 참여코드·인스타 확인·경품 상태를 관리합니다.</p>
+          </div>
+          <div class="dashboard-buttons">
+            <a id="sheetBtn" class="ghost-btn sheet-link" href="#" target="_blank" rel="noopener noreferrer">Google Sheet 열기</a>
+            <button id="refreshBtn" class="ghost-btn" type="button">새로고침</button>
+            <button id="exportBtn" class="primary-btn compact" type="button">CSV 내보내기</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <article><span>총 등록</span><strong id="statTotal">0</strong></article>
+          <article><span>인스타 확인</span><strong id="statVerified">0</strong></article>
+          <article><span>당첨</span><strong id="statWinner">0</strong></article>
+          <article><span>오늘 등록</span><strong id="statToday">0</strong></article>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box"><span>검색</span><input id="searchInput" type="search" placeholder="이름 · 전화번호 · 참여코드" /></label>
+          <label><span>인스타</span><select id="instagramFilter"><option value="all">전체</option><option value="unchecked">확인 전</option><option value="verified">공개 게시물 확인</option><option value="verified_dm">DM 인증 확인</option><option value="invalid">확인 불가</option></select></label>
+          <label><span>경품</span><select id="prizeFilter"><option value="all">전체</option><option value="none">미선정</option><option value="winner">당첨</option><option value="contacted">연락 완료</option><option value="sent">지급 완료</option></select></label>
+          <div class="toolbar-meta"><b id="visibleCount">0</b>건 표시</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>등록일</th><th>참여코드</th><th>이름</th><th>전화번호</th><th>구분</th><th>인스타</th><th>경품</th><th>관리 메모</th><th></th></tr></thead>
+            <tbody id="entryRows"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" hidden>조건에 맞는 참여자가 없습니다.</div>
+        </div>
+
+        <div class="privacy-admin-note">
+          <div><strong>개인정보 관리</strong><p>경품 지급 및 이의처리가 끝나면 고지한 보유기간에 맞춰 이름·전화번호를 삭제해주세요.</p></div>
+          <button id="purgeBtn" class="danger-btn" type="button">전체 참여정보 삭제</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  const els = {
+    login: document.getElementById('loginPanel'), dashboard: document.getElementById('dashboardPanel'),
+    loginForm: document.getElementById('loginForm'), password: document.getElementById('adminPassword'), loginBtn: document.getElementById('loginBtn'), loginStatus: document.getElementById('loginStatus'),
+    identity: document.getElementById('adminIdentity'), logout: document.getElementById('logoutBtn'), sheetBtn: document.getElementById('sheetBtn'), refresh: document.getElementById('refreshBtn'), exportBtn: document.getElementById('exportBtn'), purge: document.getElementById('purgeBtn'),
+    search: document.getElementById('searchInput'), instaFilter: document.getElementById('instagramFilter'), prizeFilter: document.getElementById('prizeFilter'), visibleCount: document.getElementById('visibleCount'), rows: document.getElementById('entryRows'), empty: document.getElementById('emptyState'),
+    total: document.getElementById('statTotal'), verified: document.getElementById('statVerified'), winner: document.getElementById('statWinner'), today: document.getElementById('statToday'), toast: document.getElementById('toast')
+  };
+
+  const TOKEN_KEY = 'energyCampaignAdminToken-v1';
+  let token = sessionStorage.getItem(TOKEN_KEY) || '';
+  let entries = [];
+  let toastTimer = null;
+  let busyCount = 0;
+
+  function showToast(text) {
+    els.toast.textContent = text; els.toast.classList.add('show'); clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => els.toast.classList.remove('show'), 2200);
+  }
+  function setView(name) {
+    els.login.hidden = name !== 'login'; els.dashboard.hidden = name !== 'dashboard'; els.logout.hidden = name !== 'dashboard';
+  }
+  function setBusy(on) {
+    busyCount += on ? 1 : -1; busyCount = Math.max(0, busyCount);
+    document.body.classList.toggle('spinner', busyCount > 0);
+  }
+  function handleFailure(err, fallback='요청을 처리하지 못했습니다.') {
+    console.error(err); const msg = String(err && err.message || err || fallback);
+    if (/세션|로그인/.test(msg)) logoutLocal('관리자 세션이 만료되었습니다. 다시 로그인해주세요.');
+    else showToast(fallback);
+  }
+  function gas(call) {
+    return new Promise((resolve, reject) => {
+      setBusy(true);
+      call(
+        value => { setBusy(false); resolve(value); },
+        error => { setBusy(false); reject(error); }
+      );
+    });
+  }
+  const api = {
+    login: password => gas((ok, bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminLogin(password)),
+    session: t => gas((ok, bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminSession(t)),
+    logout: t => gas((ok, bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminLogout(t)),
+    entries: t => gas((ok, bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminGetEntries(t)),
+    update: (t,id,field,value) => gas((ok,bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminUpdateEntry(t,id,field,value)),
+    remove: (t,id) => gas((ok,bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminDeleteEntry(t,id)),
+    purge: (t,confirmation) => gas((ok,bad) => google.script.run.withSuccessHandler(ok).withFailureHandler(bad).adminPurgeAll(t,confirmation)),
+  };
+
+  function formatPhone(value) {
+    const d=String(value||'').replace(/\D/g,'');
+    if(d.length===11) return `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`;
+    if(d.length===10) return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+    return d;
+  }
+  function formatDate(iso) {
+    if(!iso) return '-';
+    try{return new Intl.DateTimeFormat('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch(_){return iso;}
+  }
+  function isToday(iso) { const d=new Date(iso), n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); }
+  function escapeHtml(value) { return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
+
+  function renderStats() {
+    els.total.textContent=entries.length.toLocaleString('ko-KR');
+    els.verified.textContent=entries.filter(x=>x.instagram_status==='verified'||x.instagram_status==='verified_dm').length.toLocaleString('ko-KR');
+    els.winner.textContent=entries.filter(x=>['winner','contacted','sent'].includes(x.prize_status)).length.toLocaleString('ko-KR');
+    els.today.textContent=entries.filter(x=>isToday(x.created_at)).length.toLocaleString('ko-KR');
+  }
+  function filteredEntries() {
+    const q=els.search.value.trim().toLowerCase().replace(/-/g,''); const insta=els.instaFilter.value, prize=els.prizeFilter.value;
+    return entries.filter(x=>{
+      const hay=`${x.participation_code} ${x.name} ${x.phone}`.toLowerCase().replace(/-/g,'');
+      return (!q||hay.includes(q))&&(insta==='all'||x.instagram_status===insta)&&(prize==='all'||x.prize_status===prize);
+    });
+  }
+  function renderRows() {
+    const list=filteredEntries(); els.visibleCount.textContent=list.length.toLocaleString('ko-KR'); els.empty.hidden=list.length!==0;
+    els.rows.innerHTML=list.map(x=>`<tr data-id="${escapeHtml(x.id)}">
+      <td class="date-cell">${escapeHtml(formatDate(x.created_at))}</td>
+      <td class="code-cell"><button class="mini-btn copy-code" data-code="${escapeHtml(x.participation_code)}">${escapeHtml(x.participation_code)}</button></td>
+      <td><strong>${escapeHtml(x.name)}</strong></td>
+      <td class="phone-cell">${escapeHtml(formatPhone(x.phone))}</td>
+      <td><span class="type-badge">${x.participant_type==='guardian'?'법정대리인':'만 14세 이상'}</span></td>
+      <td><select class="row-select insta-status" data-id="${escapeHtml(x.id)}"><option value="unchecked" ${x.instagram_status==='unchecked'?'selected':''}>확인 전</option><option value="verified" ${x.instagram_status==='verified'?'selected':''}>공개 게시물</option><option value="verified_dm" ${x.instagram_status==='verified_dm'?'selected':''}>DM 인증</option><option value="invalid" ${x.instagram_status==='invalid'?'selected':''}>확인 불가</option></select></td>
+      <td><select class="row-select prize-status" data-id="${escapeHtml(x.id)}"><option value="none" ${x.prize_status==='none'?'selected':''}>미선정</option><option value="winner" ${x.prize_status==='winner'?'selected':''}>당첨</option><option value="contacted" ${x.prize_status==='contacted'?'selected':''}>연락 완료</option><option value="sent" ${x.prize_status==='sent'?'selected':''}>지급 완료</option></select></td>
+      <td><textarea class="row-note" data-id="${escapeHtml(x.id)}" rows="1" maxlength="300" placeholder="메모">${escapeHtml(x.admin_note||'')}</textarea></td>
+      <td><div class="row-actions"><button class="mini-btn save-note" data-id="${escapeHtml(x.id)}">메모저장</button><button class="mini-btn delete delete-row" data-id="${escapeHtml(x.id)}">삭제</button></div></td>
+    </tr>`).join('');
+  }
+
+  async function loadEntries() {
+    els.refresh.disabled=true;
+    try { entries=await api.entries(token)||[]; renderStats(); renderRows(); }
+    catch(err){handleFailure(err,'참여자 정보를 불러오지 못했습니다.');}
+    finally{els.refresh.disabled=false;}
+  }
+  async function updateEntry(id,field,value,successText) {
+    try {
+      await api.update(token,id,field,value);
+      const i=entries.findIndex(x=>x.id===id); if(i>=0) entries[i]={...entries[i],[field]:value};
+      renderStats(); if(successText) showToast(successText); return true;
+    } catch(err){handleFailure(err,'저장하지 못했습니다.'); await loadEntries(); return false;}
+  }
+  async function deleteEntry(id) {
+    const row=entries.find(x=>x.id===id); if(!row)return;
+    if(!confirm(`${row.name} (${row.participation_code}) 참여정보를 삭제할까요?\n삭제 후 복구할 수 없습니다.`))return;
+    try{await api.remove(token,id); entries=entries.filter(x=>x.id!==id); renderStats(); renderRows(); showToast('삭제했습니다.');}
+    catch(err){handleFailure(err,'삭제하지 못했습니다.');}
+  }
+  function csvEscape(value){const v=String(value??'');return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v;}
+  function exportCsv(){
+    const list=filteredEntries(); const header=['등록일시','참여코드','구분','이름','전화번호','인스타확인','경품상태','관리메모'];
+    const im={unchecked:'확인 전',verified:'공개 게시물 확인',verified_dm:'DM 인증 확인',invalid:'확인 불가'}, pm={none:'미선정',winner:'당첨',contacted:'연락 완료',sent:'지급 완료'};
+    const lines=[header,...list.map(x=>[x.created_at,x.participation_code,x.participant_type==='guardian'?'법정대리인':'만 14세 이상',x.name,formatPhone(x.phone),im[x.instagram_status],pm[x.prize_status],x.admin_note])].map(r=>r.map(csvEscape).join(','));
+    const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`energy-campaign-${new Date().toISOString().slice(0,10)}.csv`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast(`${list.length}건을 CSV로 내보냈습니다.`);
+  }
+  async function purgeAll(){
+    if(!entries.length){showToast('삭제할 참여정보가 없습니다.');return;}
+    const typed=prompt(`현재 ${entries.length}건의 이름·전화번호를 전부 삭제합니다.\n계속하려면 정확히 "전체삭제"라고 입력해주세요.`); if(typed!=='전체삭제')return;
+    try{const r=await api.purge(token,typed); entries=[];renderStats();renderRows();showToast(`${r.deleted||0}건을 삭제했습니다.`);}catch(err){handleFailure(err,'전체 삭제에 실패했습니다.');}
+  }
+  function logoutLocal(message='') { token='';sessionStorage.removeItem(TOKEN_KEY);entries=[];els.identity.textContent='';els.password.value='';setView('login');if(message)els.loginStatus.textContent=message; }
+  async function enterDashboard(sheetUrl) { els.identity.textContent='관리자'; if(sheetUrl)els.sheetBtn.href=sheetUrl; els.loginStatus.textContent='';setView('dashboard');await loadEntries(); }
+
+  els.loginForm.addEventListener('submit',async e=>{
+    e.preventDefault(); els.loginBtn.disabled=true; els.loginStatus.textContent='로그인 확인 중…';
+    try{const r=await api.login(els.password.value); if(!r||!r.ok){els.loginStatus.textContent=r?.message||'비밀번호를 확인해주세요.';return;} token=r.token;sessionStorage.setItem(TOKEN_KEY,token);els.password.value='';await enterDashboard(r.sheetUrl);}
+    catch(err){console.error(err);els.loginStatus.textContent='로그인 처리 중 오류가 발생했습니다.';}finally{els.loginBtn.disabled=false;}
+  });
+  els.logout.addEventListener('click',async()=>{try{if(token)await api.logout(token);}catch(_){}logoutLocal();});
+  els.refresh.addEventListener('click',loadEntries); els.exportBtn.addEventListener('click',exportCsv); els.purge.addEventListener('click',purgeAll);
+  [els.search,els.instaFilter,els.prizeFilter].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',renderRows));
+  els.rows.addEventListener('click',async e=>{
+    const copy=e.target.closest('.copy-code');if(copy){try{await navigator.clipboard.writeText(copy.dataset.code);}catch(_){}showToast('참여코드를 복사했습니다.');return;}
+    const save=e.target.closest('.save-note');if(save){const note=els.rows.querySelector(`.row-note[data-id="${CSS.escape(save.dataset.id)}"]`);await updateEntry(save.dataset.id,'admin_note',note.value.trim(),'메모를 저장했습니다.');return;}
+    const del=e.target.closest('.delete-row');if(del)await deleteEntry(del.dataset.id);
+  });
+  els.rows.addEventListener('change',async e=>{
+    if(e.target.matches('.insta-status'))await updateEntry(e.target.dataset.id,'instagram_status',e.target.value,'인스타 확인 상태를 저장했습니다.');
+    if(e.target.matches('.prize-status'))await updateEntry(e.target.dataset.id,'prize_status',e.target.value,'경품 상태를 저장했습니다.');
+  });
+
+  (async function init(){
+    setView('login');
+    if(!token)return;
+    try{const r=await api.session(token);if(r&&r.ok)await enterDashboard(r.sheetUrl);else logoutLocal();}catch(_){logoutLocal();}
+  })();
+})();
+</script>
+</body>
+</html>

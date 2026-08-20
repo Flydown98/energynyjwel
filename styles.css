@@ -876,3 +876,325 @@ html[data-layout="mobile"][data-orientation="portrait"] .game-meta-actions .hint
   html[data-layout="mobile"] .game-meta-actions .help-btn,
   html[data-layout="mobile"] .game-meta-actions .hint-btn { font-size: 8px; }
 }
+
+
+/* ============================================================
+   EDUCATION-FIRST CAMPAIGN LAYER · 2026-08
+   각 스테이지에서 "왜 필요한가 → 무엇을 할까 → 해낸 의미"를
+   게임 전/중/후에 바로 이해할 수 있도록 하는 안내형 UI.
+   ============================================================ */
+
+.intro-learning {
+  width: min(610px, 100%);
+  margin: -10px auto 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.intro-learning span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(9,29,62,.62);
+  color: #c8d5e9;
+  font-size: 11px;
+  font-weight: 800;
+}
+.intro-copy b { color: #fff; }
+
+.stage-guide {
+  width: min(920px, 100%);
+  margin: 0 auto 12px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 13px;
+  align-items: center;
+  padding: 13px 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 19px;
+  background: linear-gradient(135deg, rgba(15,40,80,.92), rgba(7,24,51,.88));
+  box-shadow: 0 12px 34px rgba(0,0,0,.18);
+}
+.stage-guide-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,211,36,.10);
+  border: 1px solid rgba(255,211,36,.24);
+  font-size: 25px;
+}
+.stage-guide-copy { min-width: 0; }
+.stage-guide-kicker {
+  margin: 0 0 3px;
+  color: var(--yellow);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .10em;
+}
+.stage-guide h3 {
+  margin: 0 0 4px;
+  color: white;
+  font-size: 17px;
+  letter-spacing: -.03em;
+}
+.stage-guide-why {
+  margin: 0;
+  color: #b9c6da;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.stage-guide-action {
+  margin: 6px 0 0;
+  color: #eef4ff;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+.stage-guide-action b {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #101827;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.scene-learning-tag {
+  position: absolute;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 80%;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(6,18,39,.86);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #f5f8ff;
+  box-shadow: 0 7px 20px rgba(0,0,0,.18);
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 800;
+  pointer-events: none;
+}
+.scene-learning-tag b { color: #ffe06b; }
+.stage1-tag { left: 50%; top: 7%; transform: translateX(-50%); }
+.stage2-tag { left: 50%; top: 6%; transform: translateX(-50%); color: #ecf9fc; }
+.stage3-tag { left: 50%; top: 4%; transform: translateX(-50%); }
+.stage4-tag { left: 50%; top: 5%; transform: translateX(-50%); }
+.stage5-tag { left: 50%; top: 4%; transform: translateX(-50%); }
+
+.control-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 9px);
+  transform: translateX(-50%);
+  min-width: 78px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(7,21,45,.88);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.25;
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  pointer-events: none;
+}
+.control-label b { color: var(--yellow); font-size: 9px; }
+
+.temp-action-guide {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 7px;
+  pointer-events: none;
+}
+.temp-action-guide span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(29,68,81,.15);
+  background: rgba(255,255,255,.76);
+  color: #486c76;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.device-node .device-icon { font-size: 24px; filter: grayscale(1); }
+.device-name {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 5px);
+  transform: translateX(-50%);
+  color: #d9e2f1;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.power-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 18px);
+  transform: translateX(-50%);
+  color: #ff8d86;
+  font-size: 7px;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.device-node.off .power-label { color: #65748c; }
+.device-node.off .power-label::after { content: " 완료"; }
+
+.window-motion-guide {
+  position: absolute;
+  z-index: 10;
+  right: 10%;
+  bottom: 8%;
+  color: #36576d;
+  font-size: 10px;
+  font-weight: 900;
+  pointer-events: none;
+}
+.window-motion-guide b {
+  display: inline-block;
+  margin-left: 5px;
+  color: #1f719c;
+  font-size: 20px;
+  animation: guideArrow 1.1s ease-in-out infinite alternate;
+}
+@keyframes guideArrow { from { transform: translateX(-3px); } to { transform: translateX(5px); } }
+
+.clear-learning {
+  width: min(520px, calc(100vw - 44px));
+  margin-top: 21px;
+  padding: 15px 18px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 17px;
+  background: rgba(12,31,62,.80);
+  text-align: center;
+}
+.clear-learning b {
+  display: block;
+  color: var(--yellow);
+  font-size: 15px;
+  letter-spacing: -.02em;
+}
+.clear-learning span {
+  display: block;
+  margin-top: 6px;
+  color: #c2cee1;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.ending-learning-list {
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+}
+.ending-learning-list li {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.055);
+  color: #d9e3f2;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+html[data-layout="desktop"] .stage-guide { width: min(920px, calc(100vw - 48px)); }
+
+html[data-layout="mobile"][data-orientation="portrait"] .game-screen {
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+}
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide {
+  width: min(100%, 430px);
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 9px;
+  padding: 10px 11px;
+  border-radius: 16px;
+}
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 21px;
+}
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide-kicker { font-size: 8px; }
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide h3 { font-size: 14px; margin-bottom: 3px; }
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide-why { font-size: 10px; line-height: 1.4; }
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide-action { font-size: 10px; margin-top: 5px; }
+html[data-layout="mobile"][data-orientation="portrait"] .stage-guide-action b { font-size: 8px; padding: 2px 6px; }
+html[data-layout="mobile"][data-orientation="portrait"] .game-frame { aspect-ratio: 9 / 13.2; }
+
+html[data-layout="mobile"][data-orientation="portrait"] .scene-learning-tag {
+  max-width: 88%;
+  padding: 6px 9px;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+  font-size: 9px;
+}
+html[data-layout="mobile"][data-orientation="portrait"] .stage1-tag,
+html[data-layout="mobile"][data-orientation="portrait"] .stage2-tag,
+html[data-layout="mobile"][data-orientation="portrait"] .stage3-tag,
+html[data-layout="mobile"][data-orientation="portrait"] .stage4-tag,
+html[data-layout="mobile"][data-orientation="portrait"] .stage5-tag { top: 2.5%; }
+html[data-layout="mobile"][data-orientation="portrait"] .room-window { top: 11%; }
+html[data-layout="mobile"][data-orientation="portrait"] .control-label { min-width: 82px; font-size: 9px; }
+html[data-layout="mobile"][data-orientation="portrait"] .thermo-unit { margin-top: 8%; }
+html[data-layout="mobile"][data-orientation="portrait"] .temp-action-guide { bottom: 3%; }
+html[data-layout="mobile"][data-orientation="portrait"] .standby-board { height: 69%; margin-top: 7%; }
+html[data-layout="mobile"][data-orientation="portrait"] .device-name { font-size: 8px; top: calc(100% + 4px); }
+html[data-layout="mobile"][data-orientation="portrait"] .power-label { font-size: 6.5px; top: calc(100% + 16px); }
+html[data-layout="mobile"][data-orientation="portrait"] .ac-unit { top: 10%; }
+html[data-layout="mobile"][data-orientation="portrait"] .airflow { top: 19%; }
+html[data-layout="mobile"][data-orientation="portrait"] .big-window { top: 32%; height: 46%; }
+html[data-layout="mobile"][data-orientation="portrait"] .window-motion-guide { right: 9%; bottom: 7%; font-size: 9px; }
+html[data-layout="mobile"][data-orientation="portrait"] .building { height: 56%; }
+html[data-layout="mobile"][data-orientation="portrait"] .intro-learning { max-width: 350px; gap: 6px; margin-top: -7px; }
+html[data-layout="mobile"][data-orientation="portrait"] .intro-learning span { min-height: 30px; padding: 5px 9px; font-size: 9px; }
+html[data-layout="mobile"][data-orientation="portrait"] .clear-learning { margin-top: 16px; padding: 13px 14px; }
+html[data-layout="mobile"][data-orientation="portrait"] .clear-learning b { font-size: 14px; }
+html[data-layout="mobile"][data-orientation="portrait"] .clear-learning span { font-size: 10px; }
+
+@media (max-width: 390px) {
+  html[data-layout="mobile"] .stage-guide-why { font-size: 9.5px; }
+  html[data-layout="mobile"] .stage-guide-action { font-size: 9.5px; }
+  html[data-layout="mobile"] .game-frame { aspect-ratio: 9 / 12.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window-motion-guide b { animation: none !important; }
+}
+
+/* Korean learning labels on stage select */
+.stage-english {
+  position: absolute;
+  left: 18px;
+  bottom: 42px;
+  color: #7185a8;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.stage-tile .stage-name {
+  max-width: calc(100% - 26px);
+  line-height: 1.25;
+}
+html[data-layout="mobile"][data-orientation="portrait"] .stage-english { left: 15px; bottom: 39px; font-size: 7px; }
+html[data-layout="mobile"][data-orientation="portrait"] .stage-name { font-size: 12px; }

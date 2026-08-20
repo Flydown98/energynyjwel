@@ -11,16 +11,56 @@
     submissionEndpoint: APP.appsScriptUrl || '',
     privacyPolicyUrl: APP.privacyPolicyUrl || 'https://nyjwel.or.kr/privacy',
     shareHashtags: Array.isArray(APP.shareHashtags) ? APP.shareHashtags : ['#남양주시장애인복지관', '#불을끄고별을켜다', '#에너지의날', '#에너지절약', '#에너지절약캠페인'],
-    clearDelay: 1100,
-    nextDelay: 1350,
+    clearDelay: 700,
+    nextDelay: 3200,
   };
 
   const stages = [
-    { id: 1, title: 'SWITCH', label: '불을 꺼봐', hint: '벽 어딘가에 아주 평범한 스위치가 있습니다.', directHint: '화면 왼쪽 아래쪽의 벽 스위치를 눌러보세요.' },
-    { id: 2, title: '26°', label: '숫자를 맞춰봐', hint: '여름철 실내 적정온도를 떠올려 보세요.', directHint: '온도를 26℃로 맞춰보세요. +/− 버튼으로도 조작할 수 있습니다.' },
-    { id: 3, title: 'STANDBY', label: '작은 불빛들', hint: '퇴근 후에도 빛나는 빨간 점부터 눌러보세요.', directHint: '대기전력 불빛이 켜진 기기를 하나씩 눌러 모두 꺼보세요.' },
-    { id: 4, title: 'WINDOW', label: '새는 바람', hint: '에어컨 바람이 밖으로 새고 있습니다. 창문을 끝까지 닫아보세요.', directHint: '창문 패널을 오른쪽 끝까지 밀어 닫아보세요. 쉬운 조작을 켜면 버튼으로도 닫을 수 있습니다.' },
-    { id: 5, title: 'LIGHTS OUT', label: '오늘의 마지막 불', hint: '건물에 남아 있는 모든 불빛을 꺼보세요.', directHint: '건물의 밝은 창문을 하나씩 눌러 모두 꺼보세요.' },
+    {
+      id: 1, title: 'SWITCH', label: '사용하지 않는 불 끄기', icon: '💡',
+      why: '사람이 없는 공간의 조명을 계속 켜두면 불필요한 전력이 사용돼요. 사용하지 않는 불을 끄는 작은 습관이 에너지 절약의 시작입니다.',
+      action: '방 안의 스위치를 눌러 켜진 전등을 꺼보세요.',
+      hint: '스위치는 벽 아래쪽에 있어요. 전등과 연결된 스위치를 찾아보세요.',
+      directHint: '화면 왼쪽 아래쪽의 “스위치” 표시를 눌러보세요.',
+      clearTitle: '사용하지 않는 조명은 OFF!',
+      clearText: '필요하지 않은 조명을 바로 끄면 불필요한 전력 소비를 줄일 수 있어요.'
+    },
+    {
+      id: 2, title: '26°', label: '여름철 적정온도 지키기', icon: '🌡️',
+      why: '여름철 실내 냉방온도를 지나치게 낮추면 전력 사용량이 커져요. 이 게임에서는 실내 적정온도 26℃를 기억해봅니다.',
+      action: '+ / − 버튼을 눌러 온도를 26℃로 맞춰보세요.',
+      hint: '우리나라 여름철 실내 적정온도는 26℃! 숫자를 천천히 올려보세요.',
+      directHint: '+ 버튼을 눌러 화면의 숫자를 26℃로 맞춰보세요.',
+      clearTitle: '여름철 실내 적정온도 26℃!',
+      clearText: '적정 냉방온도를 지키면 냉방에 사용하는 에너지를 줄이는 데 도움이 됩니다.'
+    },
+    {
+      id: 3, title: 'STANDBY', label: '대기전력 줄이기', icon: '🔌',
+      why: '전자기기를 사용하지 않아도 플러그가 연결되어 있거나 전원 표시등이 켜져 있으면 전기가 조금씩 소비될 수 있어요. 이를 대기전력이라고 해요.',
+      action: '화면의 전자기기마다 보이는 빨간 전원 표시(●)를 눌러 모두 꺼보세요.',
+      hint: '빨간 불빛은 “아직 전기를 사용하고 있어요”라는 표시예요.',
+      directHint: '모니터·프린터·충전기·TV·스피커의 빨간 전원 표시를 하나씩 눌러 OFF로 바꿔보세요.',
+      clearTitle: '사용하지 않을 때는 대기전력도 OFF!',
+      clearText: '사용하지 않는 전자기기의 전원과 멀티탭을 끄면 새어나가는 대기전력을 줄일 수 있어요.'
+    },
+    {
+      id: 4, title: 'WINDOW', label: '냉방 중 창문 닫기', icon: '🪟',
+      why: '에어컨을 켠 채 창문이 열려 있으면 시원한 공기가 밖으로 빠져나가 냉방 효율이 떨어지고 에너지가 낭비돼요.',
+      action: '열려 있는 창문을 오른쪽으로 밀어 끝까지 닫아보세요.',
+      hint: '파란 바람이 창문 밖으로 빠져나가고 있어요. 창문을 닫으면 막을 수 있어요.',
+      directHint: '창문 패널을 오른쪽 끝까지 밀어 닫아보세요. 조작이 어렵다면 “쉬운 조작” 버튼을 이용해도 됩니다.',
+      clearTitle: '냉방 중에는 문과 창문을 닫아요!',
+      clearText: '시원한 공기가 빠져나가지 않도록 하면 냉방 효율을 높이고 에너지 낭비를 줄일 수 있어요.'
+    },
+    {
+      id: 5, title: 'LIGHTS OUT', label: '함께 만드는 에너지 절약', icon: '⭐',
+      why: '한 사람의 작은 실천도 중요하지만 여러 사람이 함께 실천하면 더 큰 에너지 절약으로 이어질 수 있어요.',
+      action: '복지관 건물에 남아 있는 밝은 창문을 하나씩 눌러 모든 불을 꺼보세요.',
+      hint: '아직 노랗게 빛나는 창문이 있는지 찾아보세요.',
+      directHint: '밝은 창문을 하나씩 눌러 모두 어둡게 만들면 밤하늘의 별이 완성됩니다.',
+      clearTitle: '작은 실천이 모이면 큰 변화가 됩니다!',
+      clearText: '우리 모두가 함께 조명·냉방·대기전력을 관리하면 더 많은 에너지를 절약할 수 있어요.'
+    },
   ];
 
   const els = {
@@ -41,11 +81,19 @@
     constellation: document.getElementById('miniConstellation'),
     stageLabel: document.getElementById('stageLabel'),
     stageSubtitle: document.getElementById('stageSubtitle'),
+    stageGuide: document.getElementById('stageGuide'),
+    stageGuideIcon: document.getElementById('stageGuideIcon'),
+    stageGuideKicker: document.getElementById('stageGuideKicker'),
+    stageGuideTitle: document.getElementById('stageGuideTitle'),
+    stageGuideWhy: document.getElementById('stageGuideWhy'),
+    stageGuideAction: document.getElementById('stageGuideAction'),
     gameFrame: document.getElementById('gameFrame'),
     hintBtn: document.getElementById('hintBtn'),
     hintText: document.getElementById('hintText'),
     clearOverlay: document.getElementById('clearOverlay'),
     clearStageText: document.getElementById('clearStageText'),
+    clearLearningTitle: document.getElementById('clearLearningTitle'),
+    clearLearningText: document.getElementById('clearLearningText'),
     toast: document.getElementById('toast'),
     orgName: document.getElementById('orgName'),
     entryForm: document.getElementById('entryForm'),
@@ -296,7 +344,8 @@
       btn.innerHTML = `
         <span class="stage-number">${String(stage.id).padStart(2, '0')}</span>
         <span class="stage-icon" aria-hidden="true">${cleared ? '★' : unlocked ? '✦' : '×'}</span>
-        <span class="stage-name">${stage.title}</span>`;
+        <span class="stage-name">${stage.label}</span>
+        <span class="stage-english">${stage.title}</span>`;
       btn.addEventListener('click', () => openStage(stage.id));
       els.stageGrid.appendChild(btn);
     });
@@ -323,6 +372,11 @@
     const data = stages[id - 1];
     els.stageLabel.textContent = `STAGE ${String(id).padStart(2, '0')}`;
     els.stageSubtitle.textContent = data.title;
+    if (els.stageGuideIcon) els.stageGuideIcon.textContent = data.icon;
+    if (els.stageGuideKicker) els.stageGuideKicker.textContent = `STAGE ${String(id).padStart(2, '0')} · 오늘의 에너지 실천`;
+    if (els.stageGuideTitle) els.stageGuideTitle.textContent = data.label;
+    if (els.stageGuideWhy) els.stageGuideWhy.textContent = data.why;
+    if (els.stageGuideAction) els.stageGuideAction.innerHTML = `<b>해보기</b> ${data.action}`;
     els.hintText.textContent = data.hint;
     els.hintText.hidden = true;
     els.hintBtn.setAttribute('aria-expanded', 'false');
@@ -346,7 +400,10 @@
     }
     playSuccess();
     setTimeout(() => {
+      const data = stages[id - 1];
       els.clearStageText.textContent = `${String(id).padStart(2, '0')} / 05`;
+      if (els.clearLearningTitle) els.clearLearningTitle.textContent = data.clearTitle;
+      if (els.clearLearningText) els.clearLearningText.textContent = data.clearText;
       els.clearOverlay.classList.add('show');
       els.clearOverlay.setAttribute('aria-hidden', 'false');
     }, CONFIG.clearDelay);
@@ -406,7 +463,8 @@
         <div class="desk-lamp">
           <div class="light-cone"></div><div class="lamp-arm"></div><div class="lamp-head"></div><div class="lamp-base"></div>
         </div>
-        <button class="wall-switch" id="wallSwitch" type="button" aria-label="벽 스위치"></button>
+        <div class="scene-learning-tag stage1-tag">💡 사람이 없는 공간의 불은 꺼주세요</div>
+        <button class="wall-switch" id="wallSwitch" type="button" aria-label="벽 스위치"><span class="control-label">스위치<br><b>눌러보기</b></span></button>
         <button class="stage-assist-action" id="stage1Assist" type="button">💡 전등 끄기</button>
         <span class="scene-caption">01 · AFTER WORK</span>
       </div>`;
@@ -439,6 +497,8 @@
           </div>
           <div class="thermo-star star-shape"></div>
         </div>
+        <div class="scene-learning-tag stage2-tag">🌡️ 여름철 실내 적정온도는 <b>26℃</b></div>
+        <div class="temp-action-guide" aria-hidden="true"><span>＋ 온도 올리기</span><span>− 온도 내리기</span></div>
         <p class="thermo-message">여름철 실내 적정온도 · 26℃</p>
         <span class="scene-caption">02 · COOL SMART</span>
       </div>`;
@@ -482,18 +542,19 @@
 
   function renderStage3() {
     const nodes = [
-      {x:50,y:13,icon:'▣',name:'모니터'},
-      {x:82,y:38,icon:'▤',name:'프린터'},
-      {x:70,y:78,icon:'⌁',name:'충전기'},
-      {x:30,y:78,icon:'▱',name:'TV'},
-      {x:18,y:38,icon:'◫',name:'스피커'},
+      {x:50,y:13,icon:'🖥️',name:'모니터'},
+      {x:82,y:38,icon:'🖨️',name:'프린터'},
+      {x:70,y:78,icon:'🔋',name:'충전기'},
+      {x:30,y:78,icon:'📺',name:'TV'},
+      {x:18,y:38,icon:'🔊',name:'스피커'},
     ];
     els.gameFrame.innerHTML = `
       <div class="stage-scene standby-stage" id="standbyStage">
         <div class="standby-board">
           <svg class="standby-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 13 L70 78 L18 38 L82 38 L30 78 Z"/></svg>
-          ${nodes.map((n,i)=>`<button class="device-node" data-i="${i}" type="button" aria-label="${n.name} 대기전력 끄기" style="left:${n.x}%;top:${n.y}%"><span>${n.icon}</span><i></i></button>`).join('')}
+          ${nodes.map((n,i)=>`<button class="device-node" data-i="${i}" type="button" aria-label="${n.name} 대기전력 끄기" style="left:${n.x}%;top:${n.y}%"><span class="device-icon">${n.icon}</span><i></i><em class="device-name">${n.name}</em><small class="power-label">● 눌러 OFF</small></button>`).join('')}
           <div class="standby-center-star star-shape"></div>
+          <div class="scene-learning-tag stage3-tag">🔌 빨간 전원 표시를 눌러 <b>대기전력 OFF</b></div>
           <span class="board-label">STANDBY POWER · 5 DEVICES</span>
         </div>
         <button class="stage-assist-action" id="stage3Assist" type="button">🔌 대기전력 한 번에 끄기</button>
@@ -534,6 +595,8 @@
           <div class="window-panel" id="windowPanel" role="slider" tabindex="0" aria-label="창문 닫기" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
         </div>
         <div class="window-track"></div>
+        <div class="scene-learning-tag stage4-tag">🪟 냉방 중 열린 창문 → <b>닫아주세요</b></div>
+        <div class="window-motion-guide" aria-hidden="true">창문을 오른쪽으로 밀기 <b>→</b></div>
         <button class="stage-assist-action" id="stage4Assist" type="button">🪟 버튼으로 창문 닫기</button>
         <span class="scene-caption">04 · KEEP IT COOL</span>
       </div>`;
@@ -576,6 +639,7 @@
         <div class="city-stars">${starPos.map((p,i)=>`<i data-i="${i}" style="left:${p[0]}%;top:${p[1]}%"></i>`).join('')}</div>
         <svg class="constellation-svg" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5 L61 38 L96 38 L68 58 L78 92 L50 72 L22 92 L32 58 L4 38 L39 38 Z"/></svg>
         <div class="final-sky-star star-shape"></div>
+        <div class="scene-learning-tag stage5-tag">⭐ 사용하지 않는 공간의 불을 <b>모두 꺼주세요</b></div>
         <div class="building">
           <div class="building-sign">LIGHTS OUT · STARS ON</div>
           <div class="windows-grid">${Array.from({length:12},(_,i)=>`<button class="building-window" data-i="${i}" type="button" aria-label="${i+1}번째 불 끄기"></button>`).join('')}</div>

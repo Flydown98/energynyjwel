@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>캠페인 연결 점검</title>
+  <style>
+    :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#07152d;color:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}.card{width:min(720px,100%);padding:28px;border:1px solid #284467;border-radius:24px;background:#0b1e3c;box-shadow:0 24px 70px #0005}.eyebrow{margin:0;color:#ffd324;font-size:12px;font-weight:900;letter-spacing:.14em}h1{margin:8px 0 10px;font-size:32px}.desc{color:#9eb0ca;line-height:1.7}.status{margin-top:20px;padding:18px;border-radius:16px;background:#07152d;border:1px solid #263d5d}.status b{display:block;font-size:18px}.status span{display:block;margin-top:6px;color:#9eb0ca;line-height:1.6}.status.ok{border-color:#3da779;background:#0a2a27}.status.ok b{color:#76e5b3}.status.fail{border-color:#c85b66;background:#311921}.status.fail b{color:#ff9099}.url{margin-top:16px;padding:12px;border-radius:12px;background:#061124;color:#aac0df;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:900;text-decoration:none;cursor:pointer}.primary{background:#ffd324;color:#07152d}.secondary{background:#17345e;color:#fff}.meta{margin-top:16px;color:#7186a8;font-size:12px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="eyebrow">CONNECTION CHECK</p>
+    <h1>Google Apps Script 연결 점검</h1>
+    <p class="desc">개인정보를 전송하지 않고 <b>공개 참여자 수 조회(action=count)</b>만 호출해 현재 웹앱 배포와 GitHub 페이지의 연결을 확인합니다.</p>
+    <div id="status" class="status"><b>확인 중…</b><span>Apps Script 응답을 기다리고 있습니다.</span></div>
+    <div id="url" class="url">config.js 로딩 중…</div>
+    <div class="actions">
+      <button id="retry" class="primary" type="button">다시 점검</button>
+      <a id="admin" class="secondary" href="#" target="_blank" rel="noopener">관리자 페이지 열기</a>
+    </div>
+    <p class="meta">이 페이지는 운영 점검용이며 일반 게임 화면에는 링크가 표시되지 않습니다.</p>
+  </main>
+  <script src="config.js"></script>
+  <script>
+    (()=>{
+      const status=document.getElementById('status');
+      const urlBox=document.getElementById('url');
+      const admin=document.getElementById('admin');
+      const retry=document.getElementById('retry');
+      let cleanup=()=>{};
+      function run(){
+        cleanup();
+        const base=window.CAMPAIGN_APP_CONFIG?.appsScriptUrl||'';
+        urlBox.textContent=base||'Apps Script URL이 비어 있습니다.';
+        status.className='status';
+        status.innerHTML='<b>확인 중…</b><span>Apps Script 응답을 기다리고 있습니다.</span>';
+        if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(base)){
+          status.className='status fail';status.innerHTML='<b>연결 설정 오류</b><span>config.js의 appsScriptUrl 형식을 확인해주세요.</span>';return;
+        }
+        const joiner=base.includes('?')?'&':'?';
+        admin.href=`${base}${joiner}page=admin`;
+        const cb='energyConnectionCheck_'+Date.now();
+        const script=document.createElement('script');
+        let timer;
+        window[cb]=(data)=>{
+          cleanup();
+          if(data&&data.ok){status.className='status ok';status.innerHTML=`<b>✓ 연결 정상</b><span>Apps Script가 정상 응답했습니다. 현재 등록 인원: <strong>${Number(data.count||0).toLocaleString()}명</strong></span>`;}
+          else{status.className='status fail';status.innerHTML='<b>응답 오류</b><span>Apps Script는 응답했지만 정상 결과를 반환하지 않았습니다.</span>';}
+        };
+        script.src=`${base}${joiner}action=count&callback=${encodeURIComponent(cb)}&_=${Date.now()}`;
+        script.onerror=()=>{cleanup();status.className='status fail';status.innerHTML='<b>연결 실패</b><span>웹앱 배포 권한, 배포 URL 또는 네트워크 상태를 확인해주세요.</span>';};
+        document.body.appendChild(script);
+        timer=setTimeout(()=>{cleanup();status.className='status fail';status.innerHTML='<b>응답 시간 초과</b><span>10초 안에 응답하지 않았습니다. Apps Script 배포 상태를 확인해주세요.</span>';},10000);
+        cleanup=()=>{clearTimeout(timer);script.remove();try{delete window[cb]}catch(_){window[cb]=undefined};cleanup=()=>{};};
+      }
+      retry.addEventListener('click',run);run();
+    })();
+  </script>
+</body>
+</html>

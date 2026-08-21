@@ -1284,3 +1284,89 @@ html[data-layout="mobile"][data-orientation="portrait"] .stage-name { font-size:
   .share-completion-banner b { font-size: 13px; }
   .share-completion-banner span { font-size: 11px; }
 }
+
+
+/* ===== 8월 22일 에너지의 날 · 전국 동시 소등 final CTA ===== */
+.energy-day-callout {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  margin-top: 24px;
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,211,36,.28);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 15%, rgba(255,211,36,.15), transparent 25%),
+    linear-gradient(135deg, rgba(7,21,45,.96), rgba(11,36,73,.94));
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.energy-day-callout::after {
+  content: '★';
+  position: absolute;
+  right: 22px;
+  top: 15px;
+  color: rgba(255,211,36,.18);
+  font-size: 92px;
+  line-height: 1;
+  transform: rotate(10deg);
+  pointer-events: none;
+}
+.energy-day-date {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-content: center;
+  border-radius: 22px;
+  background: var(--yellow);
+  color: #07152d;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(255,211,36,.14);
+}
+.energy-day-date small { font-size: 10px; font-weight: 950; letter-spacing: .18em; line-height: 1; }
+.energy-day-date b { margin-top: 4px; font-size: 44px; line-height: .84; letter-spacing: -.06em; }
+.energy-day-copy { position: relative; z-index: 1; min-width: 0; }
+.energy-day-kicker { margin: 0 0 6px; color: #91a6c8; font-size: 10px; font-weight: 900; letter-spacing: .06em; }
+.energy-day-copy h3 { margin: 0; color: #fff; font-size: clamp(24px, 3vw, 36px); line-height: 1.08; letter-spacing: -.045em; }
+.energy-day-copy h3 span { color: var(--yellow); }
+.energy-day-copy > p:not(.energy-day-kicker) { margin: 10px 0 0; max-width: 760px; color: #bdc9dc; font-size: 12px; line-height: 1.7; }
+.energy-day-copy > p b { color: #fff; }
+.energy-day-message { margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; color: #ffe16a; font-size: 11px; }
+.energy-day-message strong { font-weight: 900; }
+.energy-day-message span { font-size: 9px; }
+
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-callout {
+  grid-template-columns: 66px minmax(0,1fr);
+  gap: 13px;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 20px;
+}
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-date { width: 64px; height: 64px; border-radius: 17px; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-date small { font-size: 8px; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-date b { font-size: 34px; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-kicker { font-size: 8px; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-copy h3 { font-size: 21px; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-copy > p:not(.energy-day-kicker) { font-size: 10px; line-height: 1.55; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-message { font-size: 9.5px; line-height: 1.4; }
+html[data-layout="mobile"][data-orientation="portrait"] .energy-day-callout::after { font-size: 64px; right: 8px; top: 9px; }
+
+html[data-mode="kiosk"] .energy-day-callout {
+  margin-top: 30px;
+  grid-template-columns: 138px minmax(0,1fr);
+  gap: 30px;
+  padding: 30px 34px;
+  border-radius: 30px;
+}
+html[data-mode="kiosk"] .energy-day-date { width: 132px; height: 132px; border-radius: 30px; }
+html[data-mode="kiosk"] .energy-day-date small { font-size: 16px; }
+html[data-mode="kiosk"] .energy-day-date b { font-size: 68px; }
+html[data-mode="kiosk"] .energy-day-kicker { font-size: 14px; }
+html[data-mode="kiosk"] .energy-day-copy h3 { font-size: 43px; }
+html[data-mode="kiosk"] .energy-day-copy > p:not(.energy-day-kicker) { font-size: 18px; line-height: 1.65; }
+html[data-mode="kiosk"] .energy-day-message { font-size: 17px; }

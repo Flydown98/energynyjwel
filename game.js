@@ -127,6 +127,7 @@
     shareDialog: document.getElementById('shareDialog'),
     shareClose: document.getElementById('shareCloseBtn'),
     shareCaption: document.getElementById('shareCaption'),
+    shareGuideText: document.getElementById('shareGuideText'),
     copyCaption: document.getElementById('copyCaptionBtn'),
     downloadCard: document.getElementById('downloadCardBtn'),
     nativeShare: document.getElementById('nativeShareBtn'),
@@ -195,6 +196,19 @@
   window.addEventListener('orientationchange', syncResponsiveLayout, { passive: true });
   window.visualViewport?.addEventListener('resize', syncResponsiveLayout, { passive: true });
 
+  // 공유 흐름은 모바일과 PC를 분리합니다.
+  // Windows/데스크톱의 Web Share 창에는 Instagram이 보장되지 않으므로 PC에서는 시스템 공유창을 호출하지 않습니다.
+  function isMobileShareEnvironment() {
+    const ua = navigator.userAgent || '';
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    const touchNarrow = (navigator.maxTouchPoints || 0) > 0 && Math.min(window.innerWidth || 9999, window.innerHeight || 9999) <= 1024;
+    return mobileUA || touchNarrow;
+  }
+
+  function hasShareClaim(data = loadParticipation()) {
+    // sharedAt은 이전 버전 호환용입니다. 새 버전에서는 shareClaimedAt을 사용합니다.
+    return Boolean(data?.shareClaimedAt || data?.sharedAt);
+  }
 
   function loadEasyControl() {
     if (IS_KIOSK) return kioskEasyControlMemory;
@@ -739,17 +753,18 @@
     renderIntroState();
   }
 
-  function setSharedLocal(shared = true) {
+  function setShareClaimedLocal(claimed = true) {
     if (IS_KIOSK) return;
     const data = loadParticipation() || { code: getParticipationCode(), createdAt: new Date().toISOString() };
-    data.sharedAt = shared ? (data.sharedAt || new Date().toISOString()) : '';
+    data.shareClaimedAt = claimed ? (data.shareClaimedAt || data.sharedAt || new Date().toISOString()) : '';
+    // 이전 버전의 sharedAt은 더 이상 새 값으로 기록하지 않습니다.
     data.updatedAt = new Date().toISOString();
     saveParticipation(data);
     renderRegistrationState();
     renderIntroState();
   }
 
-  async function notifyShareComplete() {
+  async function notifyShareClaimed() {
     if (IS_KIOSK || !isValidEndpoint()) return;
     const code = getParticipationCode();
     const body = new URLSearchParams({
@@ -757,6 +772,7 @@
       code,
       source: GAME_MODE,
       sharedAt: new Date().toISOString(),
+      shareStatus: 'claimed',
     });
     try {
       await fetch(CONFIG.submissionEndpoint, {
@@ -764,15 +780,15 @@
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
         body: body.toString(), cache: 'no-store'
       });
-    } catch (_) { /* 로컬 공유 완료 표시는 유지 */ }
+    } catch (_) { /* 이용자 제출 상태는 로컬에 유지 */ }
   }
 
-  function markShareComplete() {
+  function markShareClaimed() {
     if (IS_KIOSK) return;
-    setSharedLocal(true);
-    notifyShareComplete();
+    setShareClaimedLocal(true);
+    notifyShareClaimed();
     if (els.shareDialog?.open) els.shareDialog.close();
-    showToast('Instagram 인증 완료로 표시했습니다. 중복 응모는 제한됩니다.');
+    showToast('Instagram 게시 완료로 제출했습니다. 복지관 확인 후 최종 인증됩니다.');
   }
 
   function renderIntroState() {
@@ -787,14 +803,14 @@
     const complete = progress.cleared.length === 5;
     const data = loadParticipation();
     const registered = Boolean(data?.registered);
-    const shared = Boolean(data?.sharedAt);
+    const shared = hasShareClaim(data);
     els.resume.hidden = !complete;
     els.introCompletionNotice.hidden = !(complete || registered || shared);
 
     if (shared) {
-      els.resume.textContent = '✓ 참여 완료 내용 보기';
+      els.resume.textContent = '✓ 게시 제출 내용 보기';
       els.introCompletionNotice.className = 'intro-completion-notice completed';
-      els.introCompletionNotice.innerHTML = '<b>이미 참여를 완료했어요.</b><span>이 브라우저에서는 기록 등록과 Instagram 인증이 완료되어 중복 응모가 제한됩니다.</span>';
+      els.introCompletionNotice.innerHTML = '<b>Instagram 게시 완료가 제출되어 있어요.</b><span>같은 참여코드로 중복 응모하지 않도록 이 브라우저에서는 새 응모를 만들지 않습니다. 최종 인증은 복지관 확인 후 완료됩니다.</span>';
       els.start.innerHTML = '게임 다시보기 <span>→</span>';
     } else if (registered) {
       els.resume.textContent = '기록 등록 완료 · Instagram 인증으로 이동';
@@ -847,7 +863,7 @@
     const data = loadParticipation();
     const code = data?.code || getParticipationCode();
     const registered = Boolean(data?.registered);
-    const shared = Boolean(data?.sharedAt);
+    const shared = hasShareClaim(data);
 
     els.participationCode.textContent = code;
     els.previewCode.textContent = code;
@@ -859,7 +875,7 @@
         ? '현장 참여 등록 완료 · 다음 참여자를 위해 자동으로 새 세션을 준비합니다.'
         : '키오스크는 참여자마다 새로운 참여코드를 발급합니다.';
     } else if (shared) {
-      els.registrationStatusText.textContent = '참여 및 Instagram 인증 완료 · 이 브라우저에서는 중복 응모가 제한됩니다.';
+      els.registrationStatusText.textContent = '참여 등록 + Instagram 게시 완료 제출 · 복지관 확인 대기 중입니다.';
     } else if (registered) {
       els.registrationStatusText.textContent = '기록 등록 완료 · 이 참여코드가 공유 이미지에도 표시됩니다.';
     } else {
@@ -870,7 +886,7 @@
     const small = els.register.querySelector('small');
     if (shared && !IS_KIOSK) {
       label.textContent = '참여 기록 등록 완료';
-      small.textContent = 'Instagram 인증까지 완료됨';
+      small.textContent = 'Instagram 게시 완료 제출됨';
       els.register.disabled = true;
     } else if (registered && IS_KIOSK) {
       label.textContent = '현장 참여 등록 완료';
@@ -893,8 +909,8 @@
         els.instagram.disabled = true;
         const b = els.instagram.querySelector('b');
         const sm = els.instagram.querySelector('small');
-        if (b) b.textContent = 'Instagram 인증 완료';
-        if (sm) sm.textContent = '이미 공유 완료로 표시되었습니다';
+        if (b) b.textContent = 'Instagram 게시 완료 제출됨';
+        if (sm) sm.textContent = '복지관 확인 대기 · 중복 응모는 제한됩니다';
       } else {
         const b = els.instagram.querySelector('b');
         const sm = els.instagram.querySelector('small');
@@ -910,7 +926,7 @@
       } else if (shared) {
         els.shareCompletionBanner.hidden = false;
         els.shareCompletionBanner.className = 'share-completion-banner done';
-        els.shareCompletionBanner.innerHTML = '<b>✓ 참여 완료</b><span>이 기기에서는 Instagram 인증까지 완료한 것으로 기록되어 있습니다.</span>';
+        els.shareCompletionBanner.innerHTML = '<b>✓ Instagram 게시 완료 제출</b><span>같은 참여코드로 게시 완료가 제출되었습니다. 최종 인증은 복지관에서 게시물 또는 DM을 확인한 뒤 처리됩니다.</span>';
       } else if (registered) {
         els.shareCompletionBanner.hidden = false;
         els.shareCompletionBanner.className = 'share-completion-banner ready';
@@ -931,13 +947,14 @@
     loadPublicCount();
     showScreen(els.ending);
     shareAssetReady = false;
+    if (!IS_KIOSK) configureShareDialogForDevice();
 
     if (IS_KIOSK) {
       renderRegistrationState();
       return;
     }
 
-    const alreadyShared = Boolean(loadParticipation()?.sharedAt);
+    const alreadyShared = hasShareClaim(loadParticipation());
     if (alreadyShared) {
       renderRegistrationState();
       return;
@@ -1003,8 +1020,8 @@
     event.preventDefault();
     const input = validateEntry();
     if (!input) return;
-    if (!IS_KIOSK && loadParticipation()?.sharedAt) {
-      showToast('이미 참여와 Instagram 인증을 완료했습니다. 중복 응모는 제한됩니다.');
+    if (!IS_KIOSK && hasShareClaim(loadParticipation())) {
+      showToast('이미 참여 등록과 Instagram 게시 완료를 제출했습니다. 중복 응모는 제한됩니다.');
       renderRegistrationState();
       return;
     }
@@ -1083,6 +1100,9 @@
       '🪟 냉방 중에는 문과 창문 닫기',
       '',
       '오늘부터 일상 속 작은 에너지 절약을 실천합니다.',
+      '',
+      '🌙 8월 22일 에너지의 날',
+      '밤 9시부터 9시 10분까지, 10분간 전국 동시 소등에도 함께해주세요!',
       `참여코드 : ${code}`,
       '',
       CONFIG.instagramHandle,
@@ -1166,7 +1186,7 @@
     ctx.font = '600 34px system-ui, -apple-system, "Noto Sans KR", sans-serif';
     ctx.fillText('작은 실천이 모이면 밤하늘이 조금 더 선명해집니다.', 90, 705);
 
-    roundedRect(ctx, 90, 790, 900, 295, 42);
+    roundedRect(ctx, 90, 790, 900, 345, 42);
     ctx.fillStyle = 'rgba(7,21,45,.66)';
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.14)';
@@ -1178,20 +1198,23 @@
     ctx.fillStyle = '#ffffff';
     ctx.font = '800 36px system-ui, -apple-system, "Noto Sans KR", sans-serif';
     ctx.fillText('사용하지 않는 조명과 전자기기는 OFF', 135, 930);
-    ctx.fillText('여름철 실내 적정온도는 26℃', 135, 990);
+    ctx.fillText('여름철 실내 적정온도는 26℃', 135, 985);
+    ctx.fillStyle = '#ffd324';
+    ctx.font = '850 31px system-ui, -apple-system, "Noto Sans KR", sans-serif';
+    ctx.fillText('8월 22일 21:00~21:10 전국 동시 소등', 135, 1040);
 
     ctx.fillStyle = '#ffd324';
     ctx.font = '900 30px ui-monospace, SFMono-Regular, Menlo, monospace';
-    ctx.fillText(`참여코드  ${code}`, 135, 1055);
+    ctx.fillText(`참여코드  ${code}`, 135, 1100);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 38px system-ui, -apple-system, "Noto Sans KR", sans-serif';
-    ctx.fillText(CONFIG.organization, 90, 1190);
+    ctx.fillText(CONFIG.organization, 90, 1210);
     ctx.fillStyle = '#7186aa';
     ctx.font = '700 24px system-ui, -apple-system, "Noto Sans KR", sans-serif';
-    ctx.fillText('#불을끄고별을켜다  #에너지의날  #에너지절약', 90, 1250);
+    ctx.fillText('#불을끄고별을켜다  #에너지의날  #에너지절약', 90, 1270);
     ctx.fillStyle = '#ffd324';
-    ctx.beginPath(); ctx.arc(958, 1180, 14, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(958, 1200, 14, 0, Math.PI*2); ctx.fill();
     return canvas;
   }
 
@@ -1284,11 +1307,14 @@
     const { caption, data } = buildNativeShareData();
     copyCaptionSynchronously(caption);
 
+    if (!isMobileShareEnvironment()) return false;
+
     if (canUseNativeFileShare()) {
       try {
         await navigator.share(data);
-        markShareComplete();
-        showToast('공유가 완료되었습니다. 게시글 문구도 복사해두었습니다.');
+        // Web Share가 resolve되어도 Instagram 게시 완료 여부는 알 수 없습니다.
+        // 따라서 인증 완료로 처리하지 않고, 이용자가 게시 후 직접 확인 버튼을 누르게 합니다.
+        showToast('공유창에서 Instagram 게시까지 완료한 뒤 “게시를 완료했어요”를 눌러주세요.');
         return true;
       } catch (err) {
         if (err?.name === 'AbortError') return false;
@@ -1309,11 +1335,33 @@
     showToast('클리어 이미지를 저장했습니다.');
   }
 
+  function configureShareDialogForDevice() {
+    const mobile = isMobileShareEnvironment();
+    const caption = buildShareCaption();
+    els.shareCaption.value = caption;
+    if (els.shareGuideText) {
+      els.shareGuideText.innerHTML = mobile
+        ? '인증 이미지와 게시글 문구를 준비했습니다. <b>Instagram에서 실제 게시까지 완료한 뒤</b> 아래의 “Instagram 게시를 완료했어요”를 눌러주세요. 최종 이벤트 인증은 복지관이 게시물 또는 DM을 확인한 뒤 완료됩니다.'
+        : 'PC에서는 Windows 시스템 공유창으로 Instagram 전달이 보장되지 않아 공유창을 열지 않습니다. <b>클리어 이미지를 저장하고 게시글 문구를 복사한 뒤 Instagram 웹/앱에서 직접 게시</b>해주세요. 게시 후 “Instagram 게시를 완료했어요”를 눌러주세요.';
+    }
+    if (els.nativeShare) {
+      els.nativeShare.textContent = mobile ? 'Instagram 공유 다시 열기' : 'Instagram 웹 열기 ↗';
+    }
+  }
+
+  async function openDesktopSharePreparation() {
+    await prepareShareAsset();
+    await copyCaptionToClipboard();
+    configureShareDialogForDevice();
+    els.shareDialog.showModal();
+    showToast('PC용 인증 준비 완료 · 문구가 복사되었습니다.');
+  }
+
   async function handleInstagramShare() {
     if (IS_KIOSK) return;
     const data = loadParticipation();
-    if (data?.sharedAt) {
-      showToast('이미 Instagram 인증을 완료했습니다.');
+    if (hasShareClaim(data)) {
+      showToast('이미 Instagram 게시 완료를 제출했습니다. 최종 인증은 복지관 확인 후 처리됩니다.');
       renderRegistrationState();
       return;
     }
@@ -1322,27 +1370,35 @@
       return;
     }
 
-    // 모바일에서는 한 번의 버튼으로 "캡션 복사 + 인증 이미지 전달 + 시스템 공유창"까지 진행합니다.
-    const shared = await nativeShare({ showFallback: true });
-    if (!shared) {
-      els.shareCaption.value = buildShareCaption();
-      // 브라우저/PC에서 파일 공유가 지원되지 않거나 사용자가 공유창을 닫았을 때 대체 화면 제공
-      els.shareDialog.showModal();
+    if (!isMobileShareEnvironment()) {
+      await openDesktopSharePreparation();
+      return;
+    }
+
+    const opened = await nativeShare({ showFallback: true });
+    configureShareDialogForDevice();
+    // 공유창이 정상적으로 열렸다가 돌아온 경우에도 실제 게시 여부를 확인할 수 없으므로
+    // 반드시 확인 모달을 보여주고 이용자가 직접 게시 완료를 제출하게 합니다.
+    els.shareDialog.showModal();
+    if (!opened) {
+      showToast('공유가 취소되었거나 지원되지 않습니다. 아래 버튼으로 다시 시도할 수 있어요.');
     }
   }
 
   async function handleFallbackShare() {
-    const shared = await nativeShare({ showFallback: true });
-    if (!shared) {
+    if (!isMobileShareEnvironment()) {
       await copyCaptionToClipboard();
-      downloadShareCard();
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        showToast('이미지와 문구를 준비했습니다. Instagram 앱에서 새 게시물을 만들어주세요.');
-      } else {
-        window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
-      }
-    } else if (els.shareDialog.open) {
-      els.shareDialog.close();
+      if (!cachedShareBlob) await prepareShareAsset();
+      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      showToast('Instagram 웹을 열었습니다. 이미지 저장 후 게시글 문구를 붙여넣어주세요.');
+      return;
+    }
+
+    const opened = await nativeShare({ showFallback: true });
+    configureShareDialogForDevice();
+    if (!opened) {
+      await copyCaptionToClipboard();
+      showToast('공유창을 열지 못했습니다. 이미지 저장 후 Instagram 앱에서 게시해주세요.');
     }
   }
 
@@ -1423,7 +1479,7 @@
   els.copyCaption.addEventListener('click', copyCaptionToClipboard);
   els.downloadCard.addEventListener('click', downloadShareCard);
   els.nativeShare.addEventListener('click', handleFallbackShare);
-  els.shareDone?.addEventListener('click', () => markShareComplete());
+  els.shareDone?.addEventListener('click', () => markShareClaimed());
   els.kioskNext?.addEventListener('click', () => resetKioskSession({ goHome: true }));
   updateParticipantLabels();
   setEasyControl(easyControlOn, false);

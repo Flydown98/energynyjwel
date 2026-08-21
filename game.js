@@ -344,6 +344,39 @@
     timer = setTimeout(cleanup, 8000);
   }
 
+  function publicJsonp(action, params = {}, timeoutMs = 8000) {
+    return new Promise((resolve, reject) => {
+      if (!isValidEndpoint()) return reject(new Error('invalid_endpoint'));
+      const cb = `__energyApi_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement('script');
+      let timer = null;
+      const cleanup = () => {
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+        script.remove();
+      };
+      window[cb] = payload => { cleanup(); resolve(payload); };
+      script.onerror = () => { cleanup(); reject(new Error('jsonp_error')); };
+      const query = new URLSearchParams({ action, ...params, callback: cb, _: String(Date.now()) });
+      const joiner = CONFIG.submissionEndpoint.includes('?') ? '&' : '?';
+      script.src = `${CONFIG.submissionEndpoint}${joiner}${query.toString()}`;
+      script.async = true;
+      document.head.appendChild(script);
+      timer = setTimeout(() => { cleanup(); reject(new Error('jsonp_timeout')); }, timeoutMs);
+    });
+  }
+
+  async function waitForRegistration(code, attempts = 7) {
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        const result = await publicJsonp('status', { code }, 7000);
+        if (result?.ok && result?.exists) return result;
+      } catch (_) {}
+      await new Promise(resolve => setTimeout(resolve, 650 + (i * 180)));
+    }
+    return null;
+  }
+
   function loadProgress() {
     if (IS_KIOSK) return { cleared: [...kioskProgressMemory.cleared] };
     try {
@@ -1066,10 +1099,19 @@
         body: body.toString(),
         cache: 'no-store',
       });
+
+      // no-cors POST는 서버가 저장에 실패해도 브라우저가 성공처럼 보일 수 있으므로
+      // 참여코드가 실제 Google Sheet에 생성됐는지 공개 status API로 다시 확인합니다.
+      els.register.querySelector('small').textContent = 'Google Sheet 저장 확인 중…';
+      const verified = await waitForRegistration(code);
+      if (!verified) {
+        throw new Error('registration_not_verified');
+      }
+
       setRegisteredLocal(true);
       playSuccess();
-      showToast(IS_KIOSK ? '현장 참여가 등록되었습니다. 다음 참여자를 준비해주세요!' : '에너지 기록이 등록되었습니다!');
-      setTimeout(loadPublicCount, 900);
+      showToast(IS_KIOSK ? '현장 참여가 Google Sheet에 등록되었습니다!' : '에너지 기록이 Google Sheet에 등록되었습니다!');
+      setTimeout(loadPublicCount, 350);
       els.participantName.value = '';
       els.participantPhone.value = '';
       if (IS_KIOSK) {
@@ -1078,7 +1120,12 @@
       }
     } catch (err) {
       console.error(err);
-      showToast('등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');
+      const msg = err?.message === 'registration_not_verified'
+        ? 'Google Sheet 저장이 확인되지 않았습니다. 관리자에게 연결 상태를 확인해주세요.'
+        : '등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.';
+      showToast(msg);
+      els.registrationStatus.classList.add('needs-setup');
+      els.registrationStatusText.textContent = msg;
       els.register.querySelector('small').textContent = oldSmall;
     } finally {
       els.register.disabled = false;

@@ -143,3 +143,21 @@ https://script.google.com/macros/s/AKfycbyD2HmMGmVH601RQeLsbNGWzHT2NYzNX490So1aQ
 - Apps Script HTML 파일 이름은 **Admin.html** 로 사용하고 `Code.gs`에서도 `createHtmlOutputFromFile('Admin')`으로 호출
 
 기존에 `setupCampaign()`을 성공적으로 실행해 `ADMIN_SALT`, `ADMIN_HASH`, `SPREADSHEET_ID`가 Script Properties에 저장되어 있다면, 이번에는 **setupCampaign()을 다시 실행할 필요가 없습니다.** `Code.gs`와 `Admin.html`을 교체한 뒤 기존 웹앱 배포를 **새 버전**으로 업데이트하세요.
+
+
+## 참여자 저장이 안 될 때 — 이번 수정의 핵심
+
+이번 버전은 GitHub Pages에서 `fetch(..., mode: no-cors)`로 POST하던 방식을 제거하고, **숨겨진 HTML form → Apps Script doPost() → status API 재검증** 방식으로 변경했습니다. Google 로그인/리디렉션 때문에 `no-cors` 요청이 조용히 실패하는 경우를 줄이기 위한 수정입니다.
+
+1. Apps Script의 `Code.gs`를 이번 버전으로 교체합니다.
+2. **배포 → 배포 관리 → 기존 웹 앱 수정 → 새 버전 → 배포**합니다. 새 배포를 만들 필요는 없습니다.
+3. 웹 앱의 **실행 사용자: 나**, **액세스 권한: 모든 사용자**인지 확인합니다.
+4. GitHub에 이번 `game.js`를 올리고 Pages 배포 완료 후 강력 새로고침합니다.
+5. 게임 등록 전, 게임 페이지 자체에서 health JSONP를 검사하므로 접근권한이 잘못되면 이제 구체적인 오류 문구가 표시됩니다.
+
+### Apps Script 자체 저장 테스트
+Apps Script 편집기에서 `testRegistrationFromEditor()`를 실행하세요. `참여자` 시트에 `STAR-TEST22 / 테스트참여자` 행이 생기면 **Apps Script → 시트 저장은 정상**입니다. 테스트 후 `deleteTestRegistrationFromEditor()`를 실행하면 테스트 행이 삭제됩니다.
+
+- 편집기 테스트도 저장 안 됨 → Apps Script/시트 연결 또는 권한 문제
+- 편집기 테스트는 저장됨 + 게임 등록 안 됨 → GitHub → Apps Script 전송/배포 공개권한 문제
+- 게임에서 "Apps Script에는 연결됐지만 저장이 확인되지 않음" → Apps Script **실행 수**에서 최신 `doPost` 실행의 오류 상세를 확인

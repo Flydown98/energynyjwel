@@ -1049,6 +1049,54 @@
     return { name, phone, participantType: getParticipantType() };
   }
 
+  function submitViaHiddenForm(endpoint, params) {
+    return new Promise((resolve, reject) => {
+      try {
+        const frameName = `energy_submit_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const iframe = document.createElement('iframe');
+        iframe.name = frameName;
+        iframe.title = '참여정보 전송';
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.display = 'none';
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = endpoint;
+        form.target = frameName;
+        form.enctype = 'application/x-www-form-urlencoded';
+        form.acceptCharset = 'UTF-8';
+        form.style.display = 'none';
+
+        for (const [key, value] of params.entries()) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        HTMLFormElement.prototype.submit.call(form);
+        form.remove();
+
+        // 응답 본문은 교차 출처라 읽지 않습니다. 실제 저장 성공 여부는 status API로 재확인합니다.
+        setTimeout(resolve, 450);
+        setTimeout(() => iframe.remove(), 15000);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  async function assertPublicServerReady() {
+    const health = await publicJsonp('health', {}, 7000);
+    if (!health?.ok || !health?.spreadsheetLinked) {
+      throw new Error('server_health_failed');
+    }
+    return health;
+  }
+
   async function submitEntry(event) {
     event.preventDefault();
     const input = validateEntry();
@@ -1090,20 +1138,19 @@
     els.register.querySelector('small').textContent = '안전하게 등록 중…';
 
     try {
-      // GitHub Pages → Apps Script 교차 출처 전송은 응답을 읽지 않는 no-cors 방식으로 처리합니다.
-      // 입력값은 브라우저와 Apps Script 양쪽에서 검증합니다.
-      await fetch(CONFIG.submissionEndpoint, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: body.toString(),
-        cache: 'no-store',
-      });
+      // 1) 먼저 GitHub Pages에서 Apps Script 공개 API에 실제 접근 가능한지 확인합니다.
+      // 브라우저에서 /exec?action=health를 직접 여는 것과 달리, 이 검사는 게임 페이지의 교차 출처 환경에서 수행됩니다.
+      els.register.querySelector('small').textContent = '저장 서버 연결 확인 중…';
+      await assertPublicServerReady();
 
-      // no-cors POST는 서버가 저장에 실패해도 브라우저가 성공처럼 보일 수 있으므로
-      // 참여코드가 실제 Google Sheet에 생성됐는지 공개 status API로 다시 확인합니다.
+      // 2) fetch(no-cors)는 Google 로그인/리디렉션 상태를 숨길 수 있어 네이티브 HTML form POST로 전송합니다.
+      // hidden iframe을 대상으로 전송하므로 페이지 이동 없이 Apps Script doPost()가 호출됩니다.
+      els.register.querySelector('small').textContent = '참여정보 전송 중…';
+      await submitViaHiddenForm(CONFIG.submissionEndpoint, body);
+
+      // 3) 응답을 믿지 않고 참여코드가 실제 Google Sheet에 생겼는지 status API로 확인합니다.
       els.register.querySelector('small').textContent = 'Google Sheet 저장 확인 중…';
-      const verified = await waitForRegistration(code);
+      const verified = await waitForRegistration(code, 10);
       if (!verified) {
         throw new Error('registration_not_verified');
       }
@@ -1120,9 +1167,12 @@
       }
     } catch (err) {
       console.error(err);
-      const msg = err?.message === 'registration_not_verified'
-        ? 'Google Sheet 저장이 확인되지 않았습니다. 관리자에게 연결 상태를 확인해주세요.'
-        : '등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.';
+      let msg = '등록하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해주세요.';
+      if (err?.message === 'server_health_failed' || err?.message === 'jsonp_error' || err?.message === 'jsonp_timeout') {
+        msg = '게임에서 Apps Script에 접근하지 못했습니다. 웹 앱의 액세스 권한을 “모든 사용자”로 설정했는지 확인해주세요.';
+      } else if (err?.message === 'registration_not_verified') {
+        msg = 'Apps Script에는 연결됐지만 Google Sheet 저장이 확인되지 않았습니다. Apps Script의 실행 기록에서 doPost 오류를 확인해주세요.';
+      }
       showToast(msg);
       els.registrationStatus.classList.add('needs-setup');
       els.registrationStatusText.textContent = msg;

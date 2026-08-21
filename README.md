@@ -13,7 +13,7 @@
 
 현재 `config.js`에는 새 Apps Script 웹앱 URL이 입력되어 있습니다.
 
-`https://script.google.com/macros/s/AKfycbx6tIz25uFK36TzuVWcXsbNMqOs8ZCka8AUkB_jAYzJj5JOHlcC8fOuO3sMU2KuR22ogw/exec`
+`https://script.google.com/macros/s/AKfycbyD2HmMGmVH601RQeLsbNGWzHT2NYzNX490So1aQo9i8dvBgCy95_v-XyXbHSPHKJtQOw/exec`
 
 ## 접속 주소 예시
 GitHub Pages가 `https://flydown98.github.io/energynyjwel/`이라면:
@@ -122,3 +122,24 @@ Apps Script 프로젝트에서:
 
 ### 숨겨진 연결 점검 페이지
 GitHub Pages 배포 후 `/connection-test.html`로 접속하면 개인정보를 저장하지 않고 `action=count`만 호출해 Apps Script 연결 여부를 확인할 수 있습니다. 일반 참여 화면에는 이 주소를 노출하지 않습니다.
+
+
+## 현재 Apps Script 웹앱 URL
+
+```text
+https://script.google.com/macros/s/AKfycbyD2HmMGmVH601RQeLsbNGWzHT2NYzNX490So1aQo9i8dvBgCy95_v-XyXbHSPHKJtQOw/exec
+```
+
+관리자 접속 주소:
+
+```text
+https://script.google.com/macros/s/AKfycbyD2HmMGmVH601RQeLsbNGWzHT2NYzNX490So1aQo9i8dvBgCy95_v-XyXbHSPHKJtQOw/exec?page=admin
+```
+
+### 관리자 로그인 관련 수정사항
+- `HtmlService.XFrameOptionsMode.DENY` 제거 (Apps Script에서 지원되지 않아 오류가 발생하던 부분)
+- 관리자 세션을 `CacheService`가 아닌 `Script Properties`에 만료시간과 함께 저장하도록 변경
+- 관리자 작업 시 세션 유효기간이 다시 6시간으로 갱신
+- Apps Script HTML 파일 이름은 **Admin.html** 로 사용하고 `Code.gs`에서도 `createHtmlOutputFromFile('Admin')`으로 호출
+
+기존에 `setupCampaign()`을 성공적으로 실행해 `ADMIN_SALT`, `ADMIN_HASH`, `SPREADSHEET_ID`가 Script Properties에 저장되어 있다면, 이번에는 **setupCampaign()을 다시 실행할 필요가 없습니다.** `Code.gs`와 `Admin.html`을 교체한 뒤 기존 웹앱 배포를 **새 버전**으로 업데이트하세요.

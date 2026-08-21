@@ -1,7 +1,7 @@
 window.CAMPAIGN_APP_CONFIG = {
   organization: '남양주시장애인복지관',
   campaignName: '불을 끄고 별을 켜다',
-  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbywZb4nmzjE8MhJxAyQAftvqpt81Ov_R4cT2054dt247oY7b2U48-EXpiD0Z7HhF0fM-w/exec',
+  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbwxgp4uPGGgPEZZe1zzviH4VBMbO_z4J_kc6lJChwnGKwWJIZMkqX_6lGz3hppvRGocfw/exec',
   privacyPolicyUrl: 'https://nyjwel.or.kr/privacy',
   instagramHandle: '@nyjwel',
   shareHashtags: [
